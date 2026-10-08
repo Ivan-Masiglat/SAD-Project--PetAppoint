@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetAppoint - Veterinary Care</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="landingPage.css">
+</head>
+<body>
+
+  <!-- HEADER / NAV -->
+  <header>
+    <div class="nav">
+      <a href="#home" class="logo" onclick="showView('home')">
+        <img src="../images/logo.png" alt="PetAppoint Logo" class="logo-img">
+        PetAppoint
+      </a>
+
+      <button class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle menu">☰</button>
+
+      <ul id="nav-list">
+        <li><a href="#" class="active" onclick="showView('home', this)">Home</a></li>
+        <li><a href="#about" onclick="showView('about', this)">About Us</a></li>
+        <li><a href="#inquire" onclick="showView('inquire', this)">Inquire</a></li>
+        <li><button class="btn btn-primary btn-sm" onclick="openModal('login')">Login or Sign Up</button></li>
+      </ul>
+    </div>
+  </header>
+
+  <!-- ==================== HOME VIEW ==================== -->
+  <main id="view-home" class="view active">
+    <!-- HERO SECTION -->
+    <section class="hero">
+      <div class="wrap">
+        <div>
+          <h1>Because Your Pet Deserves the Best Care</h1>
+          <p>Compassionate care, expert vets, and complete wellness for your furry family members.</p>
+          <div class="actions">
+            <button class="btn btn-primary" onclick="openModal('signup')">Book Appointment</button>
+            <a href="#services-list" class="btn btn-outline" style="background:#fff">Our Services</a>
+          </div>
+        </div>
+        <div class="hero-img">
+          <img src="../images/logo.png" alt="PetAppoint Paw Logo" class="hero-logo-img">
+        </div>
+      </div>
+    </section>
+
+    <!-- VETS BAR -->
+    <section class="vets">
+      <div class="wrap">
+        <div class="vet">
+          <div class="avatar">MS</div>
+          <div>
+            <h3>Dr. Maria Santos</h3>
+            <p>General Practice • Wellness & Vaccines</p>
+          </div>
+        </div>
+        <div class="vet">
+          <div class="avatar">JR</div>
+          <div>
+            <h3>Dr. Jose Reyes</h3>
+            <p>Surgery • Minor Procedures</p>
+          </div>
+        </div>
+        <div class="vet">
+          <div class="avatar">AC</div>
+          <div>
+            <h3>Dr. Ana Cruz</h3>
+            <p>Dentistry • Senior Pet Care</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SERVICES SECTION -->
+    <section class="block" id="services-list">
+      <div class="wrap">
+        <div class="section-title">
+          <h2>Our Services</h2>
+          <p>Browse the services our clinic offers, then book a time that works for you.</p>
+        </div>
+
+        <div class="grid3">
+          <!-- Service 1 -->
+          <div class="card">
+            <div class="icon">
+              <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+            <h3>Wellness Check-up</h3>
+            <p>Full physical exam to keep your pet healthy, with advice on diet, weight and routine care.</p>
+            <div class="meta">⏱ ~30 min</div>
+          </div>
+
+          <!-- Service 2 -->
+          <div class="card">
+            <div class="icon">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </div>
+            <h3>Vaccinations</h3>
+            <p>Core and optional vaccines scheduled to your pet's age, species and lifestyle.</p>
+            <div class="meta">⏱ ~20 min</div>
+          </div>
+
+          <!-- Service 3 -->
+          <div class="card">
+            <div class="icon">
+              <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </div>
+            <h3>Dental Care</h3>
+            <p>Teeth cleaning and oral checks to prevent gum disease and bad breath.</p>
+            <div class="meta">⏱ ~45 min</div>
+          </div>
+
+          <!-- Service 4 -->
+          <div class="card">
+            <div class="icon">
+              <svg viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            </div>
+            <h3>Grooming & Hygiene</h3>
+            <p>Bath, trim, nail clipping and ear cleaning by gentle, trained staff.</p>
+            <div class="meta">⏱ ~60 min</div>
+          </div>
+
+          <!-- Service 5 -->
+          <div class="card">
+            <div class="icon">
+              <svg viewBox="0 0 24 24"><path d="m3 11 18-5v12L3 14v-3z"/><path d="M11.6 16.8a3 3 0 1 1-5.8-1.6"/></svg>
+            </div>
+            <h3>Minor Procedures</h3>
+            <p>Spay/neuter consultations and minor procedures. Pre-op screening is required.</p>
+            <div class="meta">⏱ ~60 min</div>
+          </div>
+
+          <!-- Service 6 -->
+          <div class="card">
+            <div class="icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <h3>Senior & Special Care</h3>
+            <p>Gentle, accessible care plans for older pets and pets with special needs.</p>
+            <div class="meta">⏱ ~40 min</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TRUST STRIP -->
+    <section class="trust">
+      <div class="wrap">
+        <span><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Easy Rescheduling</span>
+        <span><svg viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Same-Day Availability</span>
+        <span><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> Instant Confirmation</span>
+        <span><svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg> Satisfaction Guaranteed</span>
+        <span><svg viewBox="0 0 24 24"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg> Free Cancellation</span>
+      </div>
+    </section>
+
+    <!-- MAP SECTION -->
+    <section class="map">
+      <iframe id="map-frame" src="" loading="lazy" title="Clinic Location Map"></iframe>
+    </section>
+  </main>
+
+  <!-- ==================== ABOUT VIEW ==================== -->
+  <main id="view-about" class="view">
+    <div class="wrap page">
+      <h1>About PetAppoint</h1>
+      <p class="lead">Dedicated to delivering high-quality, accessible, and loving veterinary care for pets across the region.</p>
+      <div class="two">
+        <div class="card">
+          <h3>Our Mission</h3>
+          <p>We strive to simplify healthcare management for pet owners through streamlined scheduling, expert veterinary medical staff, and comprehensive wellness programs tailored to every stage of your pet's life.</p>
+        </div>
+        <div class="card">
+          <h3>Why Choose Us</h3>
+          <ul>
+            <li>Licensed and compassionate veterinary specialists</li>
+            <li>Modern diagnostic tools & sterile procedure facilities</li>
+            <li>Easy online appointment booking and instant reminders</li>
+            <li>Transparent pricing with zero hidden fees</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================== INQUIRE VIEW ==================== -->
+  <main id="view-inquire" class="view">
+    <div class="wrap page">
+      <h1>Inquire & Support</h1>
+      <p class="lead">Have a question about our services or need advice before booking? Send us a message below.</p>
+      
+      <form class="stack" onsubmit="event.preventDefault(); showToast('Thank you! Your inquiry has been sent.');">
+        <div>
+          <label>Full Name</label>
+          <input type="text" placeholder="John Doe" required>
+        </div>
+        <div class="row">
+          <div>
+            <label>Email Address</label>
+            <input type="email" placeholder="john@example.com" required>
+          </div>
+          <div>
+            <label>Phone Number</label>
+            <input type="tel" placeholder="09XX XXX XXXX">
+          </div>
+        </div>
+        <div>
+          <label>Subject</label>
+          <select required>
+            <option value="">Select inquiry type...</option>
+            <option>General Question</option>
+            <option>Vaccination / Medical Query</option>
+            <option>Surgical / Special Procedure</option>
+            <option>Grooming Appointment Inquiry</option>
+          </select>
+        </div>
+        <div>
+          <label>Message</label>
+          <textarea rows="4" placeholder="How can we help you and your pet?" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send Inquiry</button>
+      </form>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="wrap">
+      <div class="foot-top">
+        <div class="info">
+          <a href="#home" class="logo" onclick="showView('home')">
+            <img src="../images/logo.png" alt="PetAppoint Logo" class="logo-img">
+            PetAppoint
+          </a>
+          <p>
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span id="footer-address">Loading address...</span>
+          </p>
+          <p>
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            METRO MANILA: <span id="footer-phone">(02) 0000-0000</span>
+          </p>
+          <p>
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <a id="footer-email" class="u" href="#">PetAppoint@vet.ph</a>
+          </p>
+        </div>
+
+        <div>
+          <h4>HERE TO SERVE YOU BETTER</h4>
+          <p class="about">PetAppoint helps pet owners and our clinic team handle appointments quickly and without paperwork — from browsing services to confirming your slot.</p>
+          
+          <div class="news">
+            <div>
+              <strong>Newsletter</strong>
+              <small>Let's keep in touch</small>
+            </div>
+            <form onsubmit="event.preventDefault(); showToast('Subscribed to newsletter!');">
+              <input type="email" placeholder="email@gmail.com" required>
+              <button type="submit">→</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="foot-links">
+        <div>
+          <h5>Company</h5>
+          <div>
+            <a href="#about" onclick="showView('about')">About us</a>
+            <a href="#inquire" onclick="showView('inquire')">Support</a>
+          </div>
+        </div>
+        <div>
+          <h5>Legal</h5>
+          <div>
+            <a href="#">Terms and Conditions</a>
+            <a href="#">Data Privacy</a>
+            <a href="#">Cancellation Policy</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="soc">
+        <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+        <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+        <a href="#" aria-label="Phone"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>
+        <a href="#" aria-label="Email"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></a>
+      </div>
+
+      <p class="copy">©Copyright. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- ==================== AUTH / LOGIN MODAL ==================== -->
+  <div class="overlay" id="auth-modal">
+    <div class="modal">
+      <div class="brand">
+        <img src="../images/logo.png" alt="PetAppoint Logo" class="modal-logo-img">
+        <span class="w">welcome to</span>
+        <span class="n">PetAppoint</span>
+        <p>Compassionate care, expert vets, and complete wellness for your furry family members</p>
+        <hr>
+        <strong>Secure account access</strong>
+        <p style="font-size:.82rem;margin-top:.3rem">Your login and profile details are handled through the site account system.</p>
+      </div>
+
+      <div class="form">
+        <button class="close" onclick="closeModal()" aria-label="Close">&times;</button>
+        <small class="k">Login or Signup</small>
+        <h2>Account Access</h2>
+
+        <div class="tabs">
+          <button id="tab-login-btn" class="on" onclick="switchTab('login')">Login</button>
+          <button id="tab-signup-btn" onclick="switchTab('signup')">Signup</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <form id="form-login" onsubmit="handleAuth(event, 'login')">
+          <div class="field">
+            <label>Email</label>
+            <input type="email" placeholder="Enter your email" required>
+          </div>
+          <div class="field">
+            <label>Password</label>
+            <input type="password" placeholder="Enter your password" required>
+          </div>
+
+          <div class="verify">
+            This account requires email verification. Click "Send verification code" after signing in.
+            <div>
+              <button type="button" onclick="showToast('Verification code sent to your email!')">Send verification code</button>
+            </div>
+          </div>
+
+          <div class="check">
+            <label><input type="checkbox"> Keep me logged in</label>
+            <a href="#" onclick="switchTab('signup')">Create an account</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Login</button>
+        </form>
+
+        <!-- SIGNUP FORM -->
+        <form id="form-signup" class="hidden" onsubmit="handleAuth(event, 'signup')">
+          <div class="row">
+            <div class="field">
+              <label>First Name</label>
+              <input type="text" placeholder="First Name" required>
+            </div>
+            <div class="field">
+              <label>Last Name</label>
+              <input type="text" placeholder="Last Name" required>
+            </div>
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" placeholder="Enter email" required>
+          </div>
+          <div class="field">
+            <label>Phone Number</label>
+            <input type="tel" placeholder="09XX XXX XXXX" required>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Password</label>
+              <input type="password" placeholder="Password" required>
+            </div>
+            <div class="field">
+              <label>Confirm Password</label>
+              <input type="password" placeholder="Confirm Password" required>
+            </div>
+          </div>
+
+          <div class="check">
+            <label><input type="checkbox" required> I agree to the Terms of Service and Privacy Policy.</label>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast">Action completed successfully</div>
+
+  <script src="landingPage.js"></script>
+</body>
+</html>
