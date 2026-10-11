@@ -110,7 +110,7 @@ function handleAuth(event, type) {
   event.preventDefault();
 
   if (type === 'login') {
-    window.location.href = 'Homepage.html';
+    window.location.href = '../homepage/Homepage.html';
     return;
   }
 

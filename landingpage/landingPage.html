@@ -17,7 +17,7 @@
   <!-- HEADER / NAV -->
   <header>
     <div class="nav">
-      <a href="#home" class="logo" onclick="showView('home')">
+      <a href="#home" class="logo" onclick="showView('home', document.getElementById('home-nav-link'))">
         <img src="../images/logo.png" alt="PetAppoint Logo" class="logo-img">
         PetAppoint
       </a>
@@ -25,7 +25,7 @@
       <button class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle menu">☰</button>
 
       <ul id="nav-list">
-        <li><a href="#" class="active" onclick="showView('home', this)">Home</a></li>
+        <li><a href="#" class="active" id="home-nav-link" onclick="showView('home', this)">Home</a></li>
         <li><a href="#about" onclick="showView('about', this)">About Us</a></li>
         <li><a href="#inquire" onclick="showView('inquire', this)">Inquire</a></li>
         <li><button class="btn btn-primary btn-sm" onclick="openModal('login')">Login or Sign Up</button></li>
@@ -47,7 +47,13 @@
           </div>
         </div>
         <div class="hero-img">
-          <img src="../images/logo.png" alt="PetAppoint Paw Logo" class="hero-logo-img">
+          <!--<img src="../images/logo.png" alt="PetAppoint Paw Logo" class="hero-logo-img">-->
+          <div class="landing-slideshow">
+            <div class="slide"></div>
+            <div class="slide"></div>
+            <div class="slide"></div>
+            <div class="slide"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -236,7 +242,7 @@
     <div class="wrap">
       <div class="foot-top">
         <div class="info">
-          <a href="#home" class="logo" onclick="showView('home')">
+          <a href="#home" class="logo" onclick="showView('home', document.getElementById('home-nav-link'))">
             <img src="../images/logo.png" alt="PetAppoint Logo" class="logo-img">
             PetAppoint
           </a>

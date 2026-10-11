@@ -196,12 +196,48 @@ header {
   overflow: hidden;
 }
 
-.hero-logo-img {
+/* HERO SLIDESHOW */
+.landing-slideshow {
+  position: relative;
+  width: 95%;
+  height: auto;
+  aspect-ratio: 1/1;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.landing-slideshow .slide {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  animation: landingSlideFade 24s infinite;
+}
+
+.landing-slideshow .slide:nth-child(1) { 
+  background-image: url(../images/slideshow/imgslide1.jpg); animation-delay: 0s; }
+
+.landing-slideshow .slide:nth-child(2) { 
+  background-image: url(../images/slideshow/imgslide2.jpg); animation-delay: 6s; }
+
+.landing-slideshow .slide:nth-child(3) { 
+  background-image: url(../images/slideshow/imgslide3.jpg); animation-delay: 12s; }
+
+.landing-slideshow .slide:nth-child(4) { 
+  background-image: url(../images/slideshow/imgslide4.jpg); animation-delay: 18s; }
+
+@keyframes landingSlideFade {
+  4%, 25% { opacity: 1; }
+  0%, 29%, 100% { opacity: 0; }
+}
+
+/*.hero-logo-img {
   width: 55%;
   height: auto;
   object-fit: contain;
   border-radius: 20px;
-}
+}*/
 
 /* VET STRIP */
 .vets {
