@@ -108,8 +108,14 @@ function switchTab(tab) {
 
 function handleAuth(event, type) {
   event.preventDefault();
+
+  if (type === 'login') {
+    window.location.href = 'Homepage.html';
+    return;
+  }
+
   closeModal();
-  showToast(type === 'login' ? 'Successfully logged in!' : 'Account created successfully!');
+  showToast('Account created successfully!');
 }
 
 // ============================================================

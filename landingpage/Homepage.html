@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#b6dce3">
+  <title>PetAppoint | Home</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="Homepage.css">
+</head>
+<body>
+  <div class="loading-screen" role="status" aria-label="Loading PetAppoint">
+    <span class="loading-spinner" aria-hidden="true"></span>
+    <span>Getting things ready...</span>
+  </div>
+
+  <header class="site-header">
+    <nav class="navigation" aria-label="Main navigation">
+      <button class="brand placeholder-control" type="button" aria-label="PetAppoint home">
+        <img src="../images/logo.png" alt="">
+        <span>PetAppoint</span>
+      </button>
+
+      <div class="account-actions">
+        <button class="icon-button placeholder-control" type="button" aria-label="Notifications">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+        </button>
+        <button class="user-account placeholder-control" type="button">
+          <span class="user-avatar" aria-hidden="true">UA</span>
+          <span>User Account</span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main class="page-content">
+    <section class="welcome-section" aria-labelledby="welcome-title">
+      <div class="welcome-copy">
+        <span class="welcome-tag"><span class="tag-paw" aria-hidden="true">✿</span> Welcome back</span>
+        <h1 id="welcome-title">Good to see you,<br>User. How are the<br><em>pets</em> today?</h1>
+        <p>Book a visit, check what's coming up, and keep every pet's records in one cozy place.</p>
+        <button class="primary-button" type="button">Book Appointment <span aria-hidden="true">→</span></button>
+      </div>
+
+      <div class="next-visit">
+        <span class="visit-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4m8-4v4M4 10h16m-8 3v5m-2.5-2.5h5"/></svg>
+        </span>
+        <span class="visit-details">
+          <span class="eyebrow">NEXT VISIT</span>
+          <strong>Nothing booked yet</strong>
+          <span class="visit-description">Pick a day for a check-up, grooming or vaccine. It takes under a minute.</span>
+        </span>
+      </div>
+    </section>
+
+    <nav class="quick-links" aria-label="Helpful links">
+      <button class="quick-link placeholder-control" type="button">
+        <span class="quick-icon blue" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 9 17H3L12 3Z"/><path d="M12 9v5m0 3h.01"/></svg></span>
+        <span><strong>Urgent care</strong><small>Same-day help, 24/7.</small></span>
+      </button>
+      <button class="quick-link placeholder-control" type="button">
+        <span class="quick-icon orange" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h5m-9 4h4m-4 4h4"/></svg></span>
+        <span><strong>Medical records</strong><small>Vaccines and notes.</small></span>
+      </button>
+      <button class="quick-link placeholder-control" type="button">
+        <span class="quick-icon blue" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v12H9l-5 4V5Z"/><path d="M8 10h8m-8 4h5"/></svg></span>
+        <span><strong>Ask the clinic</strong><small>Get a quick reply.</small></span>
+      </button>
+      <button class="quick-link placeholder-control" type="button">
+        <span class="quick-icon orange" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 8 3v5c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>
+        <span><strong>Services &amp; pricing</strong><small>Care, grooming, more.</small></span>
+      </button>
+    </nav>
+
+    <section class="dashboard-sections" aria-label="Your dashboard">
+      <section aria-labelledby="pets-title">
+        <div class="section-heading">
+          <h2 id="pets-title">My pets</h2>
+          <button class="placeholder-control" type="button">Manage</button>
+        </div>
+        <button class="empty-card add-pet-card placeholder-control" type="button" aria-label="Add a pet">
+          <span class="add-symbol" aria-hidden="true">+</span>
+          <span>Add a pet</span>
+        </button>
+      </section>
+
+      <section aria-labelledby="activity-title">
+        <div class="section-heading">
+          <h2 id="activity-title">Recent activity</h2>
+          <button class="placeholder-control" type="button">View all</button>
+        </div>
+        <div class="empty-card activity-empty">
+          <span class="activity-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="5" cy="13" r="1.5"/><circle cx="19" cy="13" r="1.5"/><path d="M12 12c-3 0-5 4-3 5 1 .5 2-.5 3-.5s2 1 3 .5c2-1 0-5-3-5Z"/></svg>
+          </span>
+          <strong>Your story starts here</strong>
+          <span>Visits, receipts, and clinic replies<br>will appear on this timeline.</span>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-main">
+      <div class="footer-about">
+        <button class="footer-brand placeholder-control" type="button">
+          <img src="../images/logo.png" alt="">
+          <span>PetAppoint</span>
+        </button>
+        <p>Compassionate care, expert vets, and<br>complete wellness for your furry family<br>members.</p>
+      </div>
+      <div class="footer-column">
+        <h2>COMPANY</h2>
+        <button class="placeholder-control" type="button">About us</button>
+        <button class="placeholder-control" type="button">Support</button>
+      </div>
+      <div class="footer-column">
+        <h2>LEGAL</h2>
+        <button class="placeholder-control" type="button">Terms and Conditions</button>
+        <button class="placeholder-control" type="button">Data Privacy</button>
+        <button class="placeholder-control" type="button">Cancellation Policy</button>
+      </div>
+    </div>
+    <div class="footer-bottom"></div>
+  </footer>
+</body>
+</html>
