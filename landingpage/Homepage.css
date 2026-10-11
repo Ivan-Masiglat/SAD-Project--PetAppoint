@@ -198,7 +198,7 @@ button {
 .page-content {
   position: relative;
   width: min(1080px, calc(100% - 64px));
-  margin: 42px auto 0;
+  margin: 24px auto 0;
 }
 
 .page-content::after {
@@ -216,7 +216,7 @@ button {
 
 .welcome-section {
   display: grid;
-  min-height: 338px;
+  min-height: 302px;
   grid-template-columns: 1fr 1fr;
   align-items: center;
   gap: 38px;
@@ -568,11 +568,11 @@ h1 em {
 
 @media (min-width: 1500px) {
   .page-content {
-    margin-top: 58px;
+    margin-top: 36px;
   }
 
   .welcome-section {
-    min-height: 385px;
+    min-height: 349px;
   }
 }
 
