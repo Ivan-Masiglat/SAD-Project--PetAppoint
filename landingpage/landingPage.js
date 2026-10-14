@@ -32,7 +32,35 @@ window.addEventListener('DOMContentLoaded', () => {
     emailEl.textContent = CLINIC_CONFIG.emailAddress;
     emailEl.href = `mailto:${CLINIC_CONFIG.emailAddress}`;
   }
+
+  const navBtn = document.getElementById('nav-auth-btn');
+  if (navBtn && PA.getSession()) {
+    navBtn.textContent = 'My Account';
+    navBtn.onclick = () => { window.location.href = '../homepage/Homepage.html'; };
+  }
+
+  const hash = window.location.hash.replace('#', '');
+  if (hash === 'about' || hash === 'inquire') {
+    showView(hash, document.querySelector(`#nav-list a[href="#${hash}"]`));
+  }
+
+  if (new URLSearchParams(window.location.search).get('login') === '1') {
+    openModal('login');
+    showToast('Please log in first to book an appointment.');
+  }
 });
+
+// ============================================================
+// BOOKING NEEDS A LOGIN
+// ============================================================
+function startBooking() {
+  if (PA.getSession()) {
+    window.location.href = '../booking/booking.html';
+    return;
+  }
+  openModal('login');
+  showToast('Please log in or sign up first to book an appointment.');
+}
 
 // ============================================================
 // VIEW NAVIGATION (Home, About, Inquire)
@@ -108,14 +136,36 @@ function switchTab(tab) {
 
 function handleAuth(event, type) {
   event.preventDefault();
+  const form = event.target;
 
   if (type === 'login') {
-    window.location.href = '../homepage/Homepage.html';
+    // Front-end prototype
+    PA.login(form.querySelector('input[type="email"]').value);
+
+    const next = new URLSearchParams(window.location.search).get('next');
+    window.location.href = next === 'booking'
+      ? '../booking/booking.html'
+      : '../homepage/Homepage.html';
     return;
   }
 
-  closeModal();
-  showToast('Account created successfully!');
+  // SIGN UP
+  const text = form.querySelectorAll('input[type="text"]');
+  const email = form.querySelector('input[type="email"]').value;
+  const pw = form.querySelectorAll('input[type="password"]');
+  if (pw[0].value !== pw[1].value) {
+    showToast('Passwords do not match.');
+    return;
+  }
+  PA.saveAccount({
+    firstName: text[0].value.trim(),
+    lastName: text[1].value.trim(),
+    email: email,
+    phone: form.querySelector('input[type="tel"]').value
+  });
+  form.reset();
+  switchTab('login');
+  showToast('Account created! Please log in to continue.');
 }
 
 // ============================================================

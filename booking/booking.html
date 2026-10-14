@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#1c687d">
+  <title>PetAppoint | Book an Appointment</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="booking.css">
+</head>
+<!-- Hidden until booking.js confirms the visitor is logged in -->
+<body class="auth-pending">
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="nav">
+      <a href="../homepage/Homepage.html" class="logo">
+        <img src="../images/logo.png" alt="" class="logo-img">
+        PetAppoint
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="../homepage/Homepage.html">Home</a>
+        <a href="../landingpage/landingPage.html#about" class="hide-sm">About Us</a>
+        <span class="user-account">
+          <span class="user-avatar" id="user-avatar" aria-hidden="true">UA</span>
+          <span id="user-name">User Account</span>
+        </span>
+        <button type="button" class="logout-btn" id="logout-btn">Log out</button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- BOOKING -->
+  <main class="booking">
+    <div id="flow">
+      <ol class="stepper" id="stepper" aria-label="Booking progress"></ol>
+
+      <h1 id="step-title"></h1>
+      <p class="step-sub" id="step-sub"></p>
+
+      <!-- STEP 1: PET -->
+      <section class="step narrow" id="step-pet" aria-labelledby="step-title">
+        <div class="card-grid" id="pet-list"></div>
+      </section>
+
+      <!-- STEP 2: TREATMENT -->
+      <section class="step narrow" id="step-service" hidden>
+        <div class="card-grid" id="service-list"></div>
+      </section>
+
+      <!-- STEP 3: DATE & TIME (matches the Figma design) -->
+      <section class="step" id="step-time" hidden>
+        <div class="picker">
+          <aside class="mini-cal" aria-label="Choose a date">
+            <div class="cal-controls">
+              <button type="button" id="prev-month" aria-label="Previous month">&#8249;</button>
+              <select id="month-select" aria-label="Month"></select>
+              <select id="year-select" aria-label="Year"></select>
+              <button type="button" id="next-month" aria-label="Next month">&#8250;</button>
+            </div>
+            <div class="cal-grid" id="cal-grid"></div>
+          </aside>
+
+          <section class="week" id="week" aria-label="Available times"></section>
+        </div>
+        <p class="tz-note">Times are in Philippine Standard Time (GMT+8). Clinic hours: Monday to Saturday, 9:00 AM to 5:00 PM.</p>
+      </section>
+
+      <!-- SELECTION BAR -->
+      <div class="summary" id="summary">
+        <div class="summary-text">
+          <span class="summary-label">YOUR SELECTION</span>
+          <b id="summary-text">Choose a pet to begin</b>
+        </div>
+        <div class="summary-actions">
+          <button type="button" class="btn btn-ghost" id="back-btn">&larr; Back</button>
+          <button type="button" class="btn btn-primary" id="next-btn" disabled>Continue &rarr;</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONFIRMATION -->
+    <section class="confirmation" id="confirmation" hidden>
+      <div class="success-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>
+      </div>
+      <p class="eyebrow">APPOINTMENT REQUESTED</p>
+      <h1 id="confirm-title">You're all set!</h1>
+      <p class="lead">We've sent your request to the clinic. You'll be notified as soon as it's confirmed.</p>
+
+      <article class="confirm-card">
+        <div class="confirm-top">
+          <span class="eyebrow">APPOINTMENT DETAILS</span>
+          <span class="status-pill">Pending approval</span>
+        </div>
+        <h2 id="confirm-service"></h2>
+        <dl class="confirm-details">
+          <div><dt>Pet</dt><dd id="confirm-pet"></dd></div>
+          <div><dt>Date</dt><dd id="confirm-date"></dd></div>
+          <div><dt>Time</dt><dd id="confirm-time"></dd></div>
+          <div><dt>Location</dt><dd id="confirm-place"></dd></div>
+        </dl>
+        <div class="reference">Booking reference <b id="confirm-ref"></b></div>
+      </article>
+
+      <div class="confirm-actions">
+        <a class="btn btn-primary" href="../homepage/Homepage.html">Go to my home page</a>
+        <button type="button" class="btn btn-secondary" id="ics-btn">Add to calendar</button>
+        <a class="btn btn-ghost" href="booking.html">Book another appointment</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- ADD PET DIALOG -->
+  <div class="overlay" id="pet-dialog" hidden>
+    <form class="dialog" id="pet-form" role="dialog" aria-modal="true" aria-labelledby="pet-dialog-title">
+      <button type="button" class="dialog-close" id="pet-close" aria-label="Close">&times;</button>
+      <h2 id="pet-dialog-title">Add a pet</h2>
+      <p class="dialog-sub">Tell us a little about your pet so the clinic is ready for the visit.</p>
+
+      <label>Pet name
+        <input type="text" name="name" maxlength="30" placeholder="e.g. Mochi" required>
+      </label>
+      <div class="row">
+        <label>Species
+          <select name="species" required>
+            <option value="Dog">Dog</option>
+            <option value="Cat">Cat</option>
+            <option value="Rabbit">Rabbit</option>
+            <option value="Bird">Bird</option>
+            <option value="Other">Other</option>
+          </select>
+        </label>
+        <label>Sex
+          <select name="sex" required>
+            <option value="Female">Female</option>
+            <option value="Male">Male</option>
+          </select>
+        </label>
+      </div>
+      <div class="row">
+        <label>Breed
+          <input type="text" name="breed" maxlength="40" placeholder="e.g. Shih Tzu">
+        </label>
+        <label>Birth date
+          <input type="date" name="birth" id="pet-birth">
+        </label>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn btn-ghost" id="pet-cancel">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save pet</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="foot-wrap">
+      <div class="foot-top">
+        <div class="info">
+          <a href="../homepage/Homepage.html" class="logo">
+            <img src="../images/logo.png" alt="" class="logo-img">
+            PetAppoint
+          </a>
+          <p>
+            <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span class="u">Lincoln St, Antipolo, Rizal</span>
+          </p>
+          <p>
+            <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <span>METRO MANILA: <span class="u">(02) 0000-0000</span></span>
+          </p>
+          <p>
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            <a class="u" href="mailto:PetAppoint@vet.ph">PetAppoint@vet.ph</a>
+          </p>
+        </div>
+
+        <div class="about-col">
+          <h4>HERE TO SERVE YOU BETTER</h4>
+          <p class="about">PetAppoint helps pet owners and our clinic team handle appointments quickly and without paperwork, from browsing services to confirming your slot.</p>
+
+          <div class="news">
+            <div class="news-label">
+              <strong>Newsletter</strong>
+              <small>Let's keep in touch</small>
+            </div>
+            <form class="news-form" id="news-form">
+              <input type="email" placeholder="email@gmail.com" required aria-label="Email address">
+              <button type="submit" aria-label="Subscribe">&rarr;</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <div class="foot-links">
+        <div class="col">
+          <h5>Company</h5>
+          <div class="links">
+            <a href="../landingpage/landingPage.html#about">About us</a>
+            <a href="../landingpage/landingPage.html#inquire">Support</a>
+          </div>
+        </div>
+        <div class="col">
+          <h5>Legal</h5>
+          <div class="links">
+            <a href="#">Terms and Conditions</a>
+            <a href="#">Data Privacy</a>
+            <a href="#">Cancellation Policy</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="soc">
+        <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+        <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>
+        <a href="#" aria-label="Phone"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>
+        <a href="#" aria-label="Email"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></a>
+      </div>
+
+      <p class="copy">&copy;Copyright. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="../auth/auth.js"></script>
+  <script src="booking.js"></script>
+</body>
+</html>

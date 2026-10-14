@@ -27,10 +27,15 @@
         <button class="icon-button placeholder-control" type="button" aria-label="Notifications">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
         </button>
-        <button class="user-account placeholder-control" type="button">
-          <span class="user-avatar" aria-hidden="true">UA</span>
-          <span>User Account</span>
-        </button>
+        <div class="account-wrap">
+          <button class="user-account placeholder-control" type="button" id="account-btn" aria-haspopup="true" aria-expanded="false">
+            <span class="user-avatar" id="user-avatar" aria-hidden="true">UA</span>
+            <span id="user-name">User Account</span>
+          </button>
+          <div class="account-menu" id="account-menu" hidden>
+            <button type="button" id="logout-btn">Log out</button>
+          </div>
+        </div>
       </div>
     </nav>
   </header>
@@ -41,7 +46,7 @@
         <span class="welcome-tag">Welcome back</span>
         <h1 id="welcome-title">Good to see you,<br>User. How are the<br><em>pets</em> today?</h1>
         <p>Book a visit, check what's coming up, and keep every pet's records in one cozy place.</p>
-        <button class="primary-button" type="button">Book Appointment <span aria-hidden="true">→</span></button>
+        <button class="primary-button" type="button" onclick="window.location.href='../booking/booking.html'">Book Appointment <span aria-hidden="true">→</span></button>
       </div>
 
       <div class="next-visit">
@@ -126,5 +131,7 @@
     </div>
     <div class="footer-bottom"></div>
   </footer>
+  <script src="../auth/auth.js"></script>
+  <script src="homepage.js"></script>
 </body>
 </html>

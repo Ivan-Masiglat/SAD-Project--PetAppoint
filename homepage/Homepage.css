@@ -990,3 +990,44 @@ h1 em {
     animation-delay: 0s;
   }
 }
+
+.account-wrap {
+  position: relative;
+}
+
+.account-menu {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 12px);
+  right: 0;
+  min-width: 150px;
+  padding: 6px;
+  background: var(--white);
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(36, 92, 106, .25);
+}
+
+.account-menu[hidden] {
+  display: none;
+}
+
+.account-menu button {
+  width: 100%;
+  padding: 10px 12px;
+  color: var(--ink);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 9px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.account-menu button:hover {
+  background: #e6eff0;
+}
+
+.user-account,
+.primary-button {
+  cursor: pointer;
+}
