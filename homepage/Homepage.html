@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="Homepage.css">
+  <link rel="stylesheet" href="../shared/header.css">
+  <link rel="stylesheet" href="../shared/footer.css">
 </head>
 <body>
   <div class="loading-screen" role="status" aria-label="Loading PetAppoint">
@@ -44,9 +46,9 @@
     <section class="welcome-section" aria-labelledby="welcome-title">
       <div class="welcome-copy">
         <span class="welcome-tag">Welcome back</span>
-        <h1 id="welcome-title">Good to see you,<br>User. How are the<br><em>pets</em> today?</h1>
+        <h1 id="welcome-title">Good to see you,<br><span id="welcome-name">User</span>. How are the<br><em>pets</em> today?</h1>
         <p>Book a visit, check what's coming up, and keep every pet's records in one cozy place.</p>
-        <button class="primary-button" type="button" onclick="window.location.href='../booking/booking.html'">Book Appointment <span aria-hidden="true">→</span></button>
+        <button class="primary-button" id="book-btn" type="button" onclick="window.location.href='../booking/booking.html'">Book Appointment <span aria-hidden="true">→</span></button>
       </div>
 
       <div class="next-visit">
@@ -84,12 +86,9 @@
       <section aria-labelledby="pets-title">
         <div class="section-heading">
           <h2 id="pets-title">My pets</h2>
-          <button class="placeholder-control" type="button">Manage</button>
+          <button class="placeholder-control" id="add-pet-btn" type="button">Add a pet</button>
         </div>
-        <button class="empty-card add-pet-card placeholder-control" type="button" aria-label="Add a pet">
-          <span class="add-symbol" aria-hidden="true">+</span>
-          <span>Add a pet</span>
-        </button>
+        <div class="pets-list" id="pets-list"></div>
       </section>
 
       <section aria-labelledby="activity-title">
@@ -107,6 +106,63 @@
       </section>
     </section>
   </main>
+
+  <div class="pet-dialog-overlay" id="pet-dialog" hidden>
+    <section class="pet-dialog" role="dialog" aria-modal="true" aria-labelledby="pet-dialog-title">
+      <button class="pet-dialog-close" id="pet-close" type="button" aria-label="Close">&times;</button>
+      <h2 id="pet-dialog-title"></h2>
+      <div class="pet-profile-view" id="pet-profile-view" hidden>
+        <div class="pet-profile-kicker"><span></span>Pet profile</div>
+        <dl class="pet-profile-details">
+          <div><dt>Species</dt><dd id="pet-profile-species"></dd></div>
+          <div><dt>Breed</dt><dd id="pet-profile-breed"></dd></div>
+          <div><dt>Sex</dt><dd id="pet-profile-sex"></dd></div>
+          <div><dt>Birth date</dt><dd id="pet-profile-birth"></dd></div>
+          <div><dt>Age</dt><dd id="pet-profile-age"></dd></div>
+        </dl>
+        <div class="pet-dialog-actions">
+          <button class="primary-button" id="edit-pet-btn" type="button">Edit information</button>
+        </div>
+      </div>
+      <form id="pet-form" hidden>
+        <label>Pet name
+          <input type="text" name="name" maxlength="30" required>
+        </label>
+        <div class="pet-form-row">
+          <label>Species
+            <select name="species" required>
+              <option value="Dog">Dog</option>
+              <option value="Cat">Cat</option>
+              <option value="Rabbit">Rabbit</option>
+              <option value="Bird">Bird</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+          <label>Sex
+            <select name="sex" required>
+              <option value="Female">Female</option>
+              <option value="Male">Male</option>
+            </select>
+          </label>
+        </div>
+        <label id="other-species-field" hidden>Specify species
+          <input type="text" name="otherSpecies" maxlength="40" placeholder="e.g. Turtle">
+        </label>
+        <div class="pet-form-row">
+          <label>Breed
+            <input type="text" name="breed" maxlength="40">
+          </label>
+          <label>Birth date
+            <input type="date" name="birth" id="pet-birth">
+          </label>
+        </div>
+        <div class="pet-dialog-actions">
+          <button class="btn-secondary" id="pet-cancel" type="button">Cancel</button>
+          <button class="primary-button" type="submit">Save pet</button>
+        </div>
+      </form>
+    </section>
+  </div>
 
   <footer class="site-footer">
     <div class="footer-main">

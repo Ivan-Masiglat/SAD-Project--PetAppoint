@@ -11,6 +11,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Pacifico&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="booking.css">
+  <link rel="stylesheet" href="../shared/header.css">
+  <link rel="stylesheet" href="../shared/footer.css">
 </head>
 <!-- Hidden until booking.js confirms the visitor is logged in -->
 <body class="auth-pending">
@@ -50,6 +52,9 @@
       <!-- STEP 2: TREATMENT -->
       <section class="step narrow" id="step-service" hidden>
         <div class="card-grid" id="service-list"></div>
+        <label class="other-treatment" id="other-treatment-field" hidden>Specify treatment
+          <input type="text" id="other-treatment" maxlength="80" placeholder="Describe the treatment your pet needs">
+        </label>
       </section>
 
       <!-- STEP 3: DATE & TIME (matches the Figma design) -->
@@ -67,7 +72,7 @@
 
           <section class="week" id="week" aria-label="Available times"></section>
         </div>
-        <p class="tz-note">Times are in Philippine Standard Time (GMT+8). Clinic hours: Monday to Saturday, 9:00 AM to 5:00 PM.</p>
+        <p class="tz-note">Times are in Philippine Standard Time (GMT+8). Appointments run from 9:00 AM to 8:00 PM Monday through Saturday and 9:00 AM to 5:00 PM on Sunday, with a break from 12:00 PM to 12:59 PM.</p>
       </section>
 
       <!-- SELECTION BAR -->
@@ -127,7 +132,7 @@
       </label>
       <div class="row">
         <label>Species
-          <select name="species" required>
+          <select name="species" id="pet-species" required>
             <option value="Dog">Dog</option>
             <option value="Cat">Cat</option>
             <option value="Rabbit">Rabbit</option>
@@ -142,6 +147,9 @@
           </select>
         </label>
       </div>
+      <label id="pet-other-species-field" hidden>Specify species
+        <input type="text" name="otherSpecies" maxlength="40" placeholder="e.g. Turtle">
+      </label>
       <div class="row">
         <label>Breed
           <input type="text" name="breed" maxlength="40" placeholder="e.g. Shih Tzu">
@@ -159,7 +167,7 @@
   </div>
 
   <!-- FOOTER -->
-  <footer>
+  <footer class="site-footer">
     <div class="foot-wrap">
       <div class="foot-top">
         <div class="info">

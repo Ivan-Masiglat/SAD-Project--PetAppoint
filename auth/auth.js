@@ -62,8 +62,17 @@ const PA = (() => {
     const pets = getPets();
     const saved = Object.assign({ id: 'pet-' + Date.now() }, pet);
     pets.push(saved);
-    write(K.pets(s.email), pets);
-    return saved;
+    return write(K.pets(s.email), pets) ? saved : null;
+  }
+  function updatePet(id, updates) {
+    const s = getSession();
+    if (!s) return null;
+    const pets = getPets();
+    const index = pets.findIndex(pet => pet.id === id);
+    if (index < 0) return null;
+    pets[index] = Object.assign({}, pets[index], updates, { id });
+    if (!write(K.pets(s.email), pets)) return null;
+    return pets[index];
   }
 
   // Appointments
@@ -78,12 +87,8 @@ const PA = (() => {
     write(K.appointments, all);
     return appt;
   }
-  function isSlotBooked(dateKey, time) {
-    return getAllAppointments().some(a => a.date === dateKey && a.time === time && a.status !== 'cancelled');
-  }
-
   return {
     saveAccount, login, getSession, logout, initials,
-    getPets, addPet, getMyAppointments, addAppointment, isSlotBooked
+    getPets, addPet, updatePet, getMyAppointments, addAppointment
   };
 })();

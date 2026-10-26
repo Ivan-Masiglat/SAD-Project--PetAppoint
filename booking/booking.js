@@ -1,5 +1,3 @@
-const DEMO_TODAY = null;
-
 const CLINIC = {
   name: 'PetAppoint Veterinary Clinic',
   address: 'Lincoln St, Antipolo, Rizal'
@@ -21,22 +19,14 @@ const SERVICES = [
     icon: '<path d="M20.8 5.7a5.5 5.5 0 0 0-7.8 0L12 6.8l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.5a5.5 5.5 0 0 0 0-7.8Z"/>' }
 ];
 
-// Time slots shown in each day column. Edit freely.
-const TIME_SLOTS = [
-  '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '12:30 PM',
-  '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'
-];
+// Available appointment start times; the lunch break is rendered separately.
+const MORNING_TIME_SLOTS = ['9:00 AM', '10:00 AM', '11:00 AM'];
+const afternoonTimeSlots = closingHour => Array.from(
+  { length: closingHour - 12 },
+  (_, index) => (index + 1) + ':00 PM'
+);
 
-// Days the clinic is closed (0 = Sunday ... 6 = Saturday)
-const CLOSED_DAYS = [0];
-
-// TEMPORARY: until there is a database, some slots are simulated as "already
-// taken" so the grid looks like the design. Real bookings made on this page
-// are also blocked (see PA.isSlotBooked). Replace with a server lookup later.
-function isSimulatedTaken(date, slotIndex) {
-  const seed = date.getFullYear() * 1000 + date.getMonth() * 50 + date.getDate();
-  return ((seed * 31 + slotIndex * 17) % 7) === 0;
-}
+const OTHER_SERVICE_MINUTES = 30;
 
 // ============================================================
 // LOGIN GUARD - booking is only for logged-in users
@@ -62,13 +52,13 @@ function init() {
   const svg = inner => '<svg viewBox="0 0 24 24" aria-hidden="true">' + inner + '</svg>';
   const CHECK = svg('<path d="m5 12 4 4L19 6"/>');
 
-  const now = DEMO_TODAY ? new Date(DEMO_TODAY + 'T00:00:00') : new Date();
+  const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   // ----- state -----
   let step = 1;
   let petId = null;
-  let serviceId = null;
+  let serviceIds = [];
   let slot = null;                    // { dateKey, time }
   let viewYear = today.getFullYear();
   let viewMonth = today.getMonth();
@@ -98,7 +88,7 @@ function init() {
     let months = (today.getFullYear() - b.getFullYear()) * 12 + (today.getMonth() - b.getMonth());
     if (today.getDate() < b.getDate()) months--;
     if (months < 0) return '';
-    if (months < 12) return months + (months === 1 ? ' mo' : ' mos');
+    if (months < 12) return months + (months === 1 ? ' month' : ' months');
     const y = Math.floor(months / 12);
     return y + (y === 1 ? ' yr' : ' yrs');
   }
@@ -113,7 +103,14 @@ function init() {
   }
 
   const getPet = () => PA.getPets().find(p => p.id === petId);
-  const getService = () => SERVICES.find(s => s.id === serviceId);
+  const getSelectedServices = () => serviceIds.map(id => SERVICES.find(service => service.id === id));
+  const getServiceNames = () => serviceIds.map(id => id === 'other'
+    ? 'Other: ' + $('other-treatment').value.trim()
+    : SERVICES.find(service => service.id === id).title);
+  const getTotalMinutes = () => getSelectedServices().reduce((total, service) =>
+    total + (service ? service.minutes : OTHER_SERVICE_MINUTES), 0);
+  const hasValidTreatments = () => serviceIds.length > 0 &&
+    (!serviceIds.includes('other') || Boolean($('other-treatment').value.trim()));
 
   // ----- header -----
   $('user-avatar').textContent = PA.initials(session);
@@ -158,19 +155,20 @@ function init() {
   }
 
   function renderSummary() {
-    const pet = getPet(), svc = getService();
+    const pet = getPet();
+    const services = getServiceNames().filter(Boolean).join(', ');
     let text = 'Choose a pet to begin';
     if (pet) {
       if (step === 1) text = pet.name;
-      else if (step === 2) text = pet.name + ' · ' + (svc ? svc.title : 'choose a treatment');
-      else text = pet.name + ' · ' + (svc ? svc.title : '') + ' · ' +
+      else if (step === 2) text = pet.name + ' · ' + (services || 'choose a treatment');
+      else text = pet.name + ' · ' + services + ' · ' +
                   (slot ? shortDate(fromKey(slot.dateKey)) + ', ' + slot.time : 'choose a date and time');
     }
     $('summary-text').textContent = text;
 
     const next = $('next-btn');
     if (step === 1) { next.innerHTML = 'Continue &rarr;'; next.disabled = !pet; }
-    if (step === 2) { next.innerHTML = 'Continue &rarr;'; next.disabled = !svc; }
+    if (step === 2) { next.innerHTML = 'Continue &rarr;'; next.disabled = !hasValidTreatments(); }
     if (step === 3) { next.innerHTML = 'Confirm appointment &rarr;'; next.disabled = !slot; }
     $('back-btn').innerHTML = step === 1 ? '&larr; Back to home' : '&larr; Back';
   }
@@ -181,7 +179,7 @@ function init() {
   });
   $('next-btn').addEventListener('click', () => {
     if (step === 1 && petId) goStep(2);
-    else if (step === 2 && serviceId) goStep(3);
+    else if (step === 2 && hasValidTreatments()) goStep(3);
     else if (step === 3 && slot) confirmBooking();
   });
 
@@ -219,9 +217,18 @@ function init() {
   function openPetDialog() {
     $('pet-form').reset();
     $('pet-birth').max = key(today);
+    $('pet-birth').min = (today.getFullYear() - 100) + '-01-01';
+    updateOtherSpeciesField();
     dlg.hidden = false;
     $('pet-form').elements.name.focus();
   }
+  function updateOtherSpeciesField() {
+    const isOther = $('pet-species').value === 'Other';
+    $('pet-other-species-field').hidden = !isOther;
+    $('pet-form').elements.otherSpecies.required = isOther;
+    if (!isOther) $('pet-form').elements.otherSpecies.value = '';
+  }
+  $('pet-species').addEventListener('change', updateOtherSpeciesField);
   function closePetDialog() { dlg.hidden = true; }
   $('pet-close').addEventListener('click', closePetDialog);
   $('pet-cancel').addEventListener('click', closePetDialog);
@@ -232,10 +239,23 @@ function init() {
     const f = e.target.elements;
     const name = f.name.value.trim();
     if (!name) return;
+    const birth = f.birth.value;
+    const minBirth = (today.getFullYear() - 100) + '-01-01';
+    if (birth && (birth < minBirth || birth > $('pet-birth').max)) {
+      $('pet-birth').setCustomValidity('Enter a date within the last 100 years.');
+      $('pet-birth').reportValidity();
+      $('pet-birth').setCustomValidity('');
+      return;
+    }
+    const species = f.species.value === 'Other' ? f.otherSpecies.value.trim() : f.species.value;
     const saved = PA.addPet({
-      name, species: f.species.value, sex: f.sex.value,
-      breed: f.breed.value.trim(), birth: f.birth.value
+      name, species, sex: f.sex.value,
+      breed: f.breed.value.trim(), birth
     });
+    if (!saved) {
+      toast('Could not save the pet. Please try again.');
+      return;
+    }
     petId = saved ? saved.id : null;
     closePetDialog();
     renderPets();
@@ -247,19 +267,38 @@ function init() {
   // STEP 2: TREATMENT
   // ============================================================
   function renderServices() {
-    $('service-list').innerHTML = SERVICES.map(s =>
-      '<button type="button" class="choice' + (s.id === serviceId ? ' selected' : '') + '" data-service="' + s.id + '">' +
-      '<span class="ico">' + svg(s.icon) + '</span>' +
-      '<span class="txt"><b>' + s.title + '</b><small>' + s.desc + '</small><span class="mins">About ' + s.minutes + ' min</span></span>' +
-      '<span class="tick">' + CHECK + '</span></button>').join('');
+    const services = SERVICES.concat([{
+      id: 'other',
+      title: 'Other treatment',
+      minutes: OTHER_SERVICE_MINUTES,
+      desc: 'Specify another treatment not listed here.',
+      icon: '<path d="M12 5v14M5 12h14"/>'
+    }]);
+    $('service-list').innerHTML = services.map(service => {
+      const selected = serviceIds.includes(service.id);
+      return '<button type="button" class="choice' + (selected ? ' selected' : '') +
+        '" data-service="' + service.id + '" aria-pressed="' + selected + '">' +
+        '<span class="ico">' + svg(service.icon) + '</span>' +
+        '<span class="txt"><b>' + esc(service.title) + '</b><small>' + esc(service.desc) +
+        '</small><span class="mins">About ' + service.minutes + ' min</span></span>' +
+        '<span class="tick">' + CHECK + '</span></button>';
+    }).join('');
+    const otherSelected = serviceIds.includes('other');
+    $('other-treatment-field').hidden = !otherSelected;
+    $('other-treatment').required = otherSelected;
   }
   $('service-list').addEventListener('click', e => {
     const card = e.target.closest('[data-service]');
     if (!card) return;
-    serviceId = card.dataset.service;
+    const id = card.dataset.service;
+    serviceIds = serviceIds.includes(id)
+      ? serviceIds.filter(serviceId => serviceId !== id)
+      : serviceIds.concat(id);
+    slot = null;
     renderServices();
     renderSummary();
   });
+  $('other-treatment').addEventListener('input', renderSummary);
 
   // ============================================================
   // STEP 3: DATE & TIME (mini calendar + 6-day grid)
@@ -280,6 +319,58 @@ function init() {
     renderCalendar();
   }
 
+  function renderWeek() {
+    const week = $('week');
+    week.innerHTML = '';
+    const days = [];
+    for (let i = 0; i < WINDOW_DAYS; i++) {
+      const d = addDays(windowStart, i);
+      days.push(d);
+      const head = document.createElement('div');
+      head.className = 'day-head';
+      head.innerHTML = '<div class="name">' + DOW_SHORT[d.getDay()] + '</div>' +
+        '<div class="num">' + String(d.getDate()).padStart(2, '0') + '</div>';
+      week.appendChild(head);
+    }
+
+    function appendTimeGroup(date, times) {
+      const group = document.createElement('div');
+      group.className = 'day-slots';
+      group.setAttribute('aria-label', longDate(date));
+      times.forEach(time => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'slot';
+        button.textContent = time;
+        button.setAttribute('aria-label', longDate(date) + ' at ' + time);
+        if (slot && slot.dateKey === key(date) && slot.time === time) button.classList.add('selected');
+        button.addEventListener('click', () => {
+          slot = { dateKey: key(date), time };
+          renderWeek();
+          renderSummary();
+        });
+        group.appendChild(button);
+      });
+      week.appendChild(group);
+    }
+
+    days.forEach(date => appendTimeGroup(date, MORNING_TIME_SLOTS));
+    const breakRow = document.createElement('div');
+    breakRow.className = 'break-row';
+    breakRow.textContent = 'BREAK';
+    week.appendChild(breakRow);
+    days.forEach(date => {
+      const closingHour = date.getDay() === 0 ? 17 : 20;
+      appendTimeGroup(date, afternoonTimeSlots(closingHour));
+    });
+  }
+
+  function selectCalendarDate(date) {
+    windowStart = date;
+    renderCalendar();
+    renderWeek();
+  }
+
   function renderCalendar() {
     monthSel.value = viewMonth;
     yearSel.value = viewYear;
@@ -292,65 +383,18 @@ function init() {
     const first = new Date(viewYear, viewMonth, 1);
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
     for (let i = 0; i < first.getDay(); i++) grid.appendChild(document.createElement('span'));
-
     const winEnd = addDays(windowStart, WINDOW_DAYS - 1);
     for (let day = 1; day <= daysInMonth; day++) {
-      const d = new Date(viewYear, viewMonth, day);
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.textContent = day;
-      b.disabled = d < today;
-      if (d >= windowStart && d <= winEnd) b.classList.add('in-week');
-      if (sameDay(d, today)) b.classList.add('today');
-      if (sameDay(d, windowStart)) b.classList.add('active');
-      b.setAttribute('aria-label', longDate(d));
-      b.addEventListener('click', () => {
-        windowStart = d;
-        renderCalendar();
-        renderWeek();
-      });
-      grid.appendChild(b);
-    }
-  }
-
-  function isUnavailable(date, idx) {
-    const time = TIME_SLOTS[idx];
-    if (date < today || CLOSED_DAYS.includes(date.getDay())) return true;
-    if (sameDay(date, today) && !DEMO_TODAY) {            // today's slots that already passed
-      const { h, m } = to24(time);
-      if (h * 60 + m <= now.getHours() * 60 + now.getMinutes()) return true;
-    }
-    return isSimulatedTaken(date, idx) || PA.isSlotBooked(key(date), time);
-  }
-
-  function renderWeek() {
-    const week = $('week');
-    week.innerHTML = '';
-    for (let i = 0; i < WINDOW_DAYS; i++) {
-      const d = addDays(windowStart, i);
-      const closed = d < today || CLOSED_DAYS.includes(d.getDay());
-
-      const col = document.createElement('div');
-      col.className = 'day' + (closed ? ' closed' : '');
-      col.innerHTML = '<div class="day-head"><div class="name">' + DOW_SHORT[d.getDay()] + '</div>' +
-                      '<div class="num">' + String(d.getDate()).padStart(2, '0') + '</div></div>';
-
-      TIME_SLOTS.forEach((time, idx) => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'slot';
-        b.textContent = time;
-        b.disabled = isUnavailable(d, idx);
-        b.setAttribute('aria-label', longDate(d) + ' at ' + time + (b.disabled ? ' (unavailable)' : ''));
-        if (slot && slot.dateKey === key(d) && slot.time === time) b.classList.add('selected');
-        b.addEventListener('click', () => {
-          slot = { dateKey: key(d), time };
-          renderWeek();
-          renderSummary();
-        });
-        col.appendChild(b);
-      });
-      week.appendChild(col);
+      const date = new Date(viewYear, viewMonth, day);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = day;
+      if (date >= windowStart && date <= winEnd) button.classList.add('in-week');
+      if (sameDay(date, today)) button.classList.add('today');
+      if (sameDay(date, windowStart)) button.classList.add('active');
+      button.setAttribute('aria-label', longDate(date));
+      button.addEventListener('click', () => selectCalendarDate(date));
+      grid.appendChild(button);
     }
   }
 
@@ -363,17 +407,11 @@ function init() {
   // CONFIRM + CONFIRMATION SCREEN
   // ============================================================
   function confirmBooking() {
-    const pet = getPet(), svc = getService();
-    if (!pet || !svc || !slot) return;
+    const pet = getPet();
+    if (!pet || !hasValidTreatments() || !slot) return;
     const date = fromKey(slot.dateKey);
-    const idx = TIME_SLOTS.indexOf(slot.time);
-    if (isUnavailable(date, idx)) {                       // someone took it meanwhile
-      toast('Sorry, that time was just taken. Please pick another.');
-      slot = null;
-      renderWeek();
-      renderSummary();
-      return;
-    }
+    const serviceNames = getServiceNames();
+    const totalMinutes = getTotalMinutes();
     const ref = 'PA-' + String(date.getFullYear()).slice(2) + String(date.getMonth() + 1).padStart(2, '0') +
                 String(date.getDate()).padStart(2, '0') + '-' + String(Math.floor(1000 + Math.random() * 9000));
     lastBooked = PA.addAppointment({
@@ -381,7 +419,9 @@ function init() {
       ref,
       email: session.email,
       petId: pet.id, petName: pet.name, petSpecies: pet.species,
-      service: svc.title, minutes: svc.minutes,
+      service: serviceNames.join(', '),
+      services: serviceNames,
+      minutes: totalMinutes,
       date: slot.dateKey, time: slot.time,
       status: 'pending',
       createdAt: new Date().toISOString()
