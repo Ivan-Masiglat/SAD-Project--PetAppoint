@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#276b7b">
+  <title>PetAppoint | Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="admin-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="dashboard.html" aria-label="PetAppoint admin home"><img src="../images/logo.png" alt=""><span>PetAppoint</span></a>
+      <p class="nav-label">WORKSPACE</p>
+      <nav class="side-nav" aria-label="Admin navigation">
+        <a class="nav-link active" href="dashboard.html" aria-current="page"><span class="nav-icon">▦</span>Dashboard</a>
+        <a class="nav-link" href="appointments.html"><span class="nav-icon">▤</span>Appointments<span class="nav-count" id="pending-nav-count">0</span></a>
+        <a class="nav-link" href="calendar.html"><span class="nav-icon">▦</span>Calendar</a>
+        <a class="nav-link" href="clients.html"><span class="nav-icon">♧</span>Clients &amp; Pets</a>
+        <a class="nav-link" href="services.html"><span class="nav-icon">◇</span>Services</a>
+      </nav>
+      <div class="sidebar-bottom"><a class="nav-link disabled" aria-disabled="true"><span class="nav-icon">⚙</span>Settings</a><a class="logout-link" href="../landingpage/landingPage.html">Log out</a></div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar"><button class="mobile-menu" id="menu-toggle" type="button" aria-label="Open navigation">☰</button><div class="topbar-date" id="today-label"></div><div class="topbar-tools"><label class="search-box"><span aria-hidden="true">⌕</span><input type="search" placeholder="Search owner, pet, or reference" aria-label="Search owner, pet, or reference"></label><button class="avatar" type="button" aria-label="Administrator account">AD</button></div></header>
+      <section class="page-heading"><div><p class="eyebrow">CLINIC OVERVIEW</p><h1>Good morning, Admin</h1><p class="subtitle">Here’s what’s happening with your appointments.</p></div></section>
+      <section class="stats-grid" aria-label="Appointment summary">
+        <article class="stat-card"><span>Pending approvals</span><strong data-stat="pending">0</strong><small>Appointments awaiting review</small></article>
+        <article class="stat-card"><span>Today’s appointments</span><strong data-stat="today">0</strong><small>Visits scheduled today</small></article>
+        <article class="stat-card"><span>This week</span><strong data-stat="week">0</strong><small>Visits scheduled this week</small></article>
+        <article class="stat-card"><span>Cancelled this week</span><strong data-stat="cancelled">0</strong><small>Cancelled visits this week</small></article>
+      </section>
+      <section class="dashboard-grid">
+        <article class="panel approval-panel"><div class="panel-heading"><div><h2>Needs your approval</h2><p>New appointment requests will appear here.</p></div><a href="appointments.html">View all <span aria-hidden="true">→</span></a></div><div class="approval-list" id="dashboard-pending-list"></div><div class="empty-state compact-empty" id="dashboard-pending-empty"><span class="empty-illustration" aria-hidden="true">♡</span><strong>No requests yet</strong><p>When someone books a visit, you can review it here.</p></div></article>
+        <article class="panel schedule-panel"><div class="panel-heading"><div><h2>Upcoming appointments</h2><p>Your next confirmed visits.</p></div><a class="icon-action" href="appointments.html" aria-label="Open appointments">↗</a></div><div class="day-appointments" id="dashboard-upcoming-list"></div><div class="empty-state compact-empty" id="dashboard-upcoming-empty"><span class="empty-illustration calendar-mark" aria-hidden="true">▦</span><strong>No upcoming appointments</strong><p>Confirmed visits will show up here.</p></div></article>
+      </section>
+      <footer class="page-foot">PetAppoint <span>·</span> Clinic admin</footer>
+    </main>
+  </div>
+  <script src="../auth/auth.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

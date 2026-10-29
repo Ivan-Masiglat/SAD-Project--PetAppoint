@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#276b7b">
+  <title>PetAppoint | Services</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="admin-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="dashboard.html" aria-label="PetAppoint admin home"><img src="../images/logo.png" alt=""><span>PetAppoint</span></a>
+      <p class="nav-label">WORKSPACE</p>
+      <nav class="side-nav" aria-label="Admin navigation">
+        <a class="nav-link" href="dashboard.html"><span class="nav-icon">▦</span>Dashboard</a>
+        <a class="nav-link" href="appointments.html"><span class="nav-icon">▤</span>Appointments<span class="nav-count" id="pending-nav-count">0</span></a>
+        <a class="nav-link" href="calendar.html"><span class="nav-icon">▦</span>Calendar</a>
+        <a class="nav-link" href="clients.html"><span class="nav-icon">♧</span>Clients &amp; Pets</a>
+        <a class="nav-link active" href="services.html" aria-current="page"><span class="nav-icon">◇</span>Services</a>
+      </nav>
+      <div class="sidebar-bottom"><a class="nav-link disabled" aria-disabled="true"><span class="nav-icon">⚙</span>Settings</a><a class="logout-link" href="../landingpage/landingPage.html">Log out</a></div>
+    </aside>
+    <main class="main-area">
+      <header class="topbar"><button class="mobile-menu" id="menu-toggle" type="button" aria-label="Open navigation">☰</button><div class="topbar-date" id="today-label"></div><div class="topbar-tools"><label class="search-box"><span aria-hidden="true">⌕</span><input id="service-search" type="search" placeholder="Search services" aria-label="Search services"></label><button class="avatar" type="button" aria-label="Administrator account">AD</button></div></header>
+      <section class="page-heading appointments-heading"><div><p class="eyebrow">CLINIC CATALOG</p><h1>Services</h1><p class="subtitle">Review the treatments clients can choose when booking a visit.</p></div></section>
+      <section class="panel service-editor">
+        <div class="panel-heading"><div><h2>Add a service</h2><p>New services will be available to clients in the booking form.</p></div></div>
+        <form id="service-form" class="service-form">
+          <label>Service name<input name="name" type="text" maxlength="80" required></label>
+          <label>Estimated time (minutes)<input name="minutes" type="number" min="1" max="1440" step="1" required></label>
+          <label>Approximate price (PHP)<input name="price" type="number" min="0" max="1000000" step="1" required></label>
+          <label class="service-description-field">Description<textarea name="description" rows="3" maxlength="500" required></textarea></label>
+          <div class="service-form-footer"><p id="service-form-message" role="status" aria-live="polite"></p><button class="accept-appointment" type="submit">Add service</button></div>
+        </form>
+      </section>
+      <p class="service-load-message" id="service-load-message" role="status" aria-live="polite" hidden></p>
+      <section class="service-grid" id="service-list" aria-live="polite"></section>
+      <p class="catalog-note">Prices are approximate starting prices in PHP. Update them here as clinic rates change.</p>
+      <footer class="page-foot">PetAppoint <span>·</span> Clinic admin</footer>
+    </main>
+  </div>
+  <script src="../auth/auth.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

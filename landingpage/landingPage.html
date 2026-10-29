@@ -44,7 +44,7 @@
           <h1>Because Your Pet Deserves the Best Care</h1>
           <p>Compassionate care, expert vets, and complete wellness for your furry family members.</p>
           <div class="actions">
-            <button class="btn btn-primary" onclick="openModal('signup')">Book Appointment</button>
+            <button class="btn btn-primary" onclick="openBookingPreview()">Book Appointment</button>
             <a href="#services-list" class="btn btn-outline" style="background:#fff">Our Services</a>
           </div>
         </div>
@@ -307,6 +307,45 @@
     </div>
   </footer>
 
+  <!-- ==================== BOOKING PREVIEW ==================== -->
+  <div class="overlay booking-preview-overlay" id="booking-preview-modal" onclick="handleBookingPreviewBackdrop(event)">
+    <section class="booking-preview-modal" role="dialog" aria-modal="true" aria-labelledby="booking-preview-title">
+      <button class="close" type="button" onclick="closeBookingPreview()" aria-label="Close booking preview">&times;</button>
+      <p class="booking-preview-eyebrow">PLAN YOUR VISIT</p>
+      <h2 id="booking-preview-title">Choose an appointment day</h2>
+      <p class="booking-preview-intro">Choose a day to see which appointment times are open. Sign in or create an account to book.</p>
+      <div class="booking-calendar-layout">
+        <section class="booking-calendar-panel" aria-label="Choose a day">
+          <div class="booking-calendar-toolbar">
+            <h3 id="booking-calendar-month"></h3>
+            <div>
+              <button type="button" class="booking-month-button" id="booking-month-prev" aria-label="Previous month">‹</button>
+              <button type="button" class="booking-month-button" id="booking-month-next" aria-label="Next month">›</button>
+            </div>
+          </div>
+          <div class="booking-calendar-grid" id="booking-calendar-grid" aria-label="Available appointment days">
+            <p class="booking-preview-loading">Checking the calendar…</p>
+          </div>
+          <div class="booking-calendar-legend">
+            <span><i class="booking-legend-dot booking-legend-open"></i>Times available</span>
+            <span><i class="booking-legend-dot booking-legend-full"></i>Fully booked</span>
+          </div>
+        </section>
+        <section class="booking-times-panel" aria-labelledby="booking-selected-date">
+          <h3 id="booking-selected-date">Select an available day</h3>
+          <p class="booking-times-hint">Open appointment times are shown in teal. Unavailable times are grayed out.</p>
+          <div class="booking-time-list" id="booking-preview-times" aria-live="polite">
+            <p class="booking-preview-loading">Select a day to see times.</p>
+          </div>
+        </section>
+      </div>
+      <p class="booking-preview-error" id="booking-preview-error" role="alert" hidden></p>
+      <div class="booking-preview-footer">
+        <button class="btn btn-primary" type="button" onclick="continueToBooking()">Continue to booking</button>
+      </div>
+    </section>
+  </div>
+
   <!-- ==================== AUTH / LOGIN MODAL ==================== -->
   <div class="overlay" id="auth-modal">
     <div class="modal">
@@ -379,11 +418,11 @@
           <div class="row">
             <div class="field">
               <label>Password</label>
-              <input type="password" placeholder="Password" required>
+              <input type="password" placeholder="Password" minlength="6" required>
             </div>
             <div class="field">
               <label>Confirm Password</label>
-              <input type="password" placeholder="Confirm Password" required>
+              <input type="password" placeholder="Confirm Password" minlength="6" required>
             </div>
           </div>
 

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#276b7b">
+  <title>PetAppoint | Calendar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="admin-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="dashboard.html" aria-label="PetAppoint admin home"><img src="../images/logo.png" alt=""><span>PetAppoint</span></a>
+      <p class="nav-label">WORKSPACE</p>
+      <nav class="side-nav" aria-label="Admin navigation">
+        <a class="nav-link" href="dashboard.html"><span class="nav-icon">▦</span>Dashboard</a>
+        <a class="nav-link" href="appointments.html"><span class="nav-icon">▤</span>Appointments<span class="nav-count" id="pending-nav-count">0</span></a>
+        <a class="nav-link active" href="calendar.html" aria-current="page"><span class="nav-icon">▦</span>Calendar</a>
+        <a class="nav-link" href="clients.html"><span class="nav-icon">♧</span>Clients &amp; Pets</a>
+        <a class="nav-link" href="services.html"><span class="nav-icon">◇</span>Services</a>
+      </nav>
+      <div class="sidebar-bottom"><a class="nav-link disabled" aria-disabled="true"><span class="nav-icon">⚙</span>Settings</a><a class="logout-link" href="../landingpage/landingPage.html">Log out</a></div>
+    </aside>
+    <main class="main-area">
+      <header class="topbar"><button class="mobile-menu" id="menu-toggle" type="button" aria-label="Open navigation">☰</button><div class="topbar-date" id="today-label"></div><div class="topbar-tools"><label class="search-box"><span aria-hidden="true">⌕</span><input type="search" placeholder="Search owner, pet, or service" aria-label="Search appointments"></label><button class="avatar" type="button" aria-label="Administrator account">AD</button></div></header>
+      <section class="page-heading appointments-heading"><div><p class="eyebrow">CLINIC OVERVIEW</p><h1>Calendar</h1><p class="subtitle">See appointments by day and plan the clinic’s schedule.</p></div></section>
+      <section class="calendar-layout">
+        <article class="panel admin-calendar">
+          <div class="calendar-toolbar">
+            <div><h2 id="calendar-month-label"></h2><p>Select a date to view its appointments.</p></div>
+            <div class="calendar-actions"><button class="calendar-today" id="calendar-today" type="button">Today</button><button class="calendar-today" id="calendar-next-appointment" type="button" hidden>Next appointment</button><button class="calendar-arrow" id="calendar-prev" type="button" aria-label="Previous month">‹</button><button class="calendar-arrow" id="calendar-next" type="button" aria-label="Next month">›</button></div>
+          </div>
+          <div class="month-grid" id="calendar-grid" aria-label="Monthly appointment calendar"></div>
+          <div class="calendar-legend"><span><i class="legend-dot"></i> Has appointments</span><span id="month-appointment-count">0 appointments this month</span></div>
+        </article>
+        <aside class="panel day-panel">
+          <div class="panel-heading"><div><p class="eyebrow">DAILY SCHEDULE</p><h2 id="selected-date-label"></h2><p id="selected-date-count"></p></div></div>
+          <div class="day-appointments" id="day-appointments" aria-live="polite"></div>
+        </aside>
+      </section>
+      <footer class="page-foot">PetAppoint <span>·</span> Clinic admin</footer>
+    </main>
+  </div>
+  <script src="../auth/auth.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

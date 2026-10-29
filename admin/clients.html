@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#276b7b">
+  <title>PetAppoint | Clients &amp; Pets</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Pacifico&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <div class="admin-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="dashboard.html" aria-label="PetAppoint admin home"><img src="../images/logo.png" alt=""><span>PetAppoint</span></a>
+      <p class="nav-label">WORKSPACE</p>
+      <nav class="side-nav" aria-label="Admin navigation">
+        <a class="nav-link" href="dashboard.html"><span class="nav-icon">▦</span>Dashboard</a>
+        <a class="nav-link" href="appointments.html"><span class="nav-icon">▤</span>Appointments<span class="nav-count" id="pending-nav-count">0</span></a>
+        <a class="nav-link" href="calendar.html"><span class="nav-icon">▦</span>Calendar</a>
+        <a class="nav-link active" href="clients.html" aria-current="page"><span class="nav-icon">♧</span>Clients &amp; Pets</a>
+        <a class="nav-link" href="services.html"><span class="nav-icon">◇</span>Services</a>
+      </nav>
+      <div class="sidebar-bottom"><a class="nav-link disabled" aria-disabled="true"><span class="nav-icon">⚙</span>Settings</a><a class="logout-link" href="../landingpage/landingPage.html">Log out</a></div>
+    </aside>
+    <main class="main-area">
+      <header class="topbar"><button class="mobile-menu" id="menu-toggle" type="button" aria-label="Open navigation">☰</button><div class="topbar-date" id="today-label"></div><div class="topbar-tools"><label class="search-box"><span aria-hidden="true">⌕</span><input id="client-search" type="search" placeholder="Search clients or pets" aria-label="Search clients or pets"></label><button class="avatar" type="button" aria-label="Administrator account">AD</button></div></header>
+      <section class="page-heading appointments-heading"><div><p class="eyebrow">CLINIC DIRECTORY</p><h1>Clients &amp; Pets</h1><p class="subtitle">Browse client contact details, pets, and visit history.</p></div></section>
+      <section class="directory-summary" aria-label="Directory totals"><article class="stat-card"><span>Clients</span><strong id="client-total">0</strong><small>Registered accounts</small></article><article class="stat-card"><span>Pets</span><strong id="pet-total">0</strong><small>Profiles on file</small></article></section>
+      <section class="client-grid" id="client-list" aria-live="polite"></section>
+      <footer class="page-foot">PetAppoint <span>·</span> Clinic admin</footer>
+    </main>
+  </div>
+  <script src="../auth/auth.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

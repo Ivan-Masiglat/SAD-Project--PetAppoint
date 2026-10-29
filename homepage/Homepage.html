@@ -46,7 +46,7 @@
     <section class="welcome-section" aria-labelledby="welcome-title">
       <div class="welcome-copy">
         <span class="welcome-tag">Welcome back</span>
-        <h1 id="welcome-title">Good to see you,<br><span id="welcome-name">User</span>. How are the<br><em>pets</em> today?</h1>
+        <h1 id="welcome-title"><span class="welcome-intro">Good to see you,</span><span class="welcome-name"><span id="welcome-name">User</span>.</span><span class="welcome-question">How are the <em>pets</em> today?</span></h1>
         <p>Book a visit, check what's coming up, and keep every pet's records in one cozy place.</p>
         <button class="primary-button" id="book-btn" type="button" onclick="window.location.href='../booking/booking.html'">Book Appointment <span aria-hidden="true">→</span></button>
       </div>
@@ -57,26 +57,26 @@
         </span>
         <span class="visit-details">
           <span class="eyebrow">NEXT VISIT</span>
-          <strong>Nothing booked yet</strong>
-          <span class="visit-description">Pick a day for a check-up, grooming or vaccine. It takes under a minute.</span>
+          <strong id="visit-title">Nothing booked yet</strong>
+          <span class="visit-description" id="visit-desc">Pick a day for a check-up, grooming or vaccine. It takes under a minute.</span>
         </span>
       </div>
     </section>
 
     <nav class="quick-links" aria-label="Helpful links">
-      <button class="quick-link placeholder-control" type="button">
+      <button class="quick-link" id="urgent-care-btn" type="button">
         <span class="quick-icon blue" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 9 17H3L12 3Z"/><path d="M12 9v5m0 3h.01"/></svg></span>
         <span><strong>Urgent care</strong><small>Same-day help, 24/7.</small></span>
       </button>
-      <button class="quick-link placeholder-control" type="button">
+      <button class="quick-link" id="medical-records-btn" type="button">
         <span class="quick-icon orange" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h8l4 4v14H7z"/><path d="M15 3v5h5m-9 4h4m-4 4h4"/></svg></span>
         <span><strong>Medical records</strong><small>Vaccines and notes.</small></span>
       </button>
-      <button class="quick-link placeholder-control" type="button">
+      <button class="quick-link" id="ask-clinic-btn" type="button">
         <span class="quick-icon blue" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v12H9l-5 4V5Z"/><path d="M8 10h8m-8 4h5"/></svg></span>
         <span><strong>Ask the clinic</strong><small>Get a quick reply.</small></span>
       </button>
-      <button class="quick-link placeholder-control" type="button">
+      <button class="quick-link" id="services-pricing-btn" type="button">
         <span class="quick-icon orange" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 8 3v5c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-3Z"/><path d="m9 12 2 2 4-4"/></svg></span>
         <span><strong>Services &amp; pricing</strong><small>Care, grooming, more.</small></span>
       </button>
@@ -89,14 +89,18 @@
           <button class="placeholder-control" id="add-pet-btn" type="button">Add a pet</button>
         </div>
         <div class="pets-list" id="pets-list"></div>
+        <p class="pets-load-error" id="pets-load-error" role="status" hidden>
+          Your appointment loaded, but its pet profile could not be restored in this browser.
+        </p>
       </section>
 
       <section aria-labelledby="activity-title">
         <div class="section-heading">
           <h2 id="activity-title">Recent activity</h2>
-          <button class="placeholder-control" type="button">View all</button>
+          <button id="view-all-activity-btn" type="button">View all</button>
         </div>
-        <div class="empty-card activity-empty">
+        <div class="activity-list" id="activity-list" aria-live="polite"></div>
+        <div class="empty-card activity-empty" id="activity-empty">
           <span class="activity-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="5" cy="13" r="1.5"/><circle cx="19" cy="13" r="1.5"/><path d="M12 12c-3 0-5 4-3 5 1 .5 2-.5 3-.5s2 1 3 .5c2-1 0-5-3-5Z"/></svg>
           </span>
@@ -158,9 +162,79 @@
         </div>
         <div class="pet-dialog-actions">
           <button class="btn-secondary" id="pet-cancel" type="button">Cancel</button>
+          <button class="delete-pet-button" id="delete-pet-btn" type="button" hidden>Delete pet</button>
           <button class="primary-button" type="submit">Save pet</button>
         </div>
       </form>
+    </section>
+  </div>
+
+  <div class="feature-overlay" id="urgent-dialog" hidden>
+    <section class="feature-dialog" role="dialog" aria-modal="true" aria-labelledby="urgent-dialog-title">
+      <button class="feature-dialog-close" type="button" data-close-feature aria-label="Close">&times;</button>
+      <p class="feature-kicker">PRIORITY BOOKING</p>
+      <h2 id="urgent-dialog-title">Urgent care</h2>
+      <p class="feature-intro">Request the nearest available time for Emergency Care. Emergency slots are available 24/7; the clinic will review and confirm your request.</p>
+      <form id="urgent-form">
+        <label for="urgent-pet">Pet</label>
+        <select id="urgent-pet" name="petId" required></select>
+        <p id="urgent-no-pets" class="feature-message" hidden>No pet profiles yet. Add a pet before requesting urgent care.</p>
+        <button id="urgent-add-pet" class="feature-secondary" type="button" hidden>Add a pet</button>
+        <div class="urgent-slot-card">
+          <span>Nearest emergency slot</span>
+          <strong id="urgent-slot-label">Finding the next slot…</strong>
+          <small id="urgent-service-price">Emergency Care · Approx. ₱1,000</small>
+        </div>
+        <p id="urgent-error" class="feature-error" role="alert" hidden></p>
+        <div class="feature-actions">
+          <button class="feature-secondary" type="button" data-close-feature>Cancel</button>
+          <button class="feature-primary" id="urgent-submit" type="submit">Request urgent booking</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div class="feature-overlay" id="records-dialog" hidden>
+    <section class="feature-dialog feature-dialog-wide" role="dialog" aria-modal="true" aria-labelledby="records-dialog-title">
+      <button class="feature-dialog-close" type="button" data-close-feature aria-label="Close">&times;</button>
+      <p class="feature-kicker">YOUR APPOINTMENTS</p>
+      <h2 id="records-dialog-title">Medical records &amp; history</h2>
+      <p class="feature-intro">Appointment history for all your pets, including pending, confirmed, completed, and cancelled visits.</p>
+      <div id="records-list" class="records-list" aria-live="polite"></div>
+      <p id="records-message" class="feature-message" role="status" hidden></p>
+    </section>
+  </div>
+
+  <div class="feature-overlay" id="contact-dialog" hidden>
+    <section class="feature-dialog" role="dialog" aria-modal="true" aria-labelledby="contact-dialog-title">
+      <button class="feature-dialog-close" type="button" data-close-feature aria-label="Close">&times;</button>
+      <p class="feature-kicker">CLIENT SUPPORT</p>
+      <h2 id="contact-dialog-title">Ask the clinic</h2>
+      <p class="feature-intro">Write to the clinic. Your default email app will open with a message addressed to PetAppoint.</p>
+      <form id="contact-form">
+        <label for="contact-email">Your email</label>
+        <input id="contact-email" name="email" type="email" readonly>
+        <label for="contact-subject">Subject</label>
+        <input id="contact-subject" name="subject" type="text" maxlength="100" required>
+        <label for="contact-message">Message</label>
+        <textarea id="contact-message" name="message" rows="5" maxlength="2000" required></textarea>
+        <p id="contact-error" class="feature-error" role="alert" hidden></p>
+        <div class="feature-actions">
+          <button class="feature-secondary" type="button" data-close-feature>Cancel</button>
+          <button class="feature-primary" type="submit">Continue to email</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div class="feature-overlay" id="services-dialog" hidden>
+    <section class="feature-dialog feature-dialog-wide" role="dialog" aria-modal="true" aria-labelledby="services-dialog-title">
+      <button class="feature-dialog-close" type="button" data-close-feature aria-label="Close">&times;</button>
+      <p class="feature-kicker">CLINIC CATALOG</p>
+      <h2 id="services-dialog-title">Services &amp; pricing</h2>
+      <p class="feature-intro">View the treatments offered by PetAppoint. Prices are approximate starting prices in PHP and may vary by pet and treatment.</p>
+      <div id="public-service-list" class="public-service-list" aria-live="polite"></div>
+      <p id="public-services-message" class="feature-message" role="status" hidden></p>
     </section>
   </div>
 

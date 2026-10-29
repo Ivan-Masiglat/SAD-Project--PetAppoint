@@ -17,6 +17,7 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 [hidden] { display: none !important; }
+.service-load-error{margin:0 0 12px;padding:10px 12px;border:1px solid #f0d7a7;border-radius:8px;background:#fff7e7;color:#805e24;font-size:12px}
 
 body {
   font-family: Inter, system-ui, sans-serif;
@@ -243,6 +244,8 @@ svg { flex: none; }
   transition: background .12s;
 }
 .slot:hover { background: #b6d8e0; }
+.slot:disabled { border-color: #d7e1e3; background: var(--off-bg); color: var(--off-text); cursor: not-allowed; }
+.slot.booked:disabled { border-color: #ead4d2; background: #f7e9e7; color: #a56b66; text-decoration: line-through; }
 .slot.selected,
 .slot.selected:hover { background: var(--orange); border-color: var(--orange-dark); color: #2d291f; font-weight: 700; }
 .other-treatment {
@@ -425,7 +428,6 @@ svg { flex: none; }
 }
 @media (max-width: 640px) {
   .card-grid { grid-template-columns: 1fr; }
-  .hide-sm { display: none; }
   .user-account span:last-child { display: none; }
   .stepper li b { display: none; }
   .booking h1 { font-size: 1.45rem; }

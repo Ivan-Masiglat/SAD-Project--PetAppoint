@@ -19,7 +19,7 @@ const SERVICES = [
     icon: '<path d="M20.8 5.7a5.5 5.5 0 0 0-7.8 0L12 6.8l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.5a5.5 5.5 0 0 0 0-7.8Z"/>' }
 ];
 
-// Available appointment start times; the lunch break is rendered separately.
+// Regular appointments pause for lunch; emergency appointments use all 24 hours.
 const MORNING_TIME_SLOTS = ['9:00 AM', '10:00 AM', '11:00 AM'];
 const afternoonTimeSlots = closingHour => Array.from(
   { length: closingHour - 12 },
@@ -34,6 +34,8 @@ const OTHER_SERVICE_MINUTES = 30;
 const session = PA.getSession();
 if (!session) {
   location.replace('../landingpage/landingPage.html?login=1&next=booking');
+} else if (session.role === 'admin') {
+  location.replace('../admin/dashboard.html');
 } else {
   document.body.classList.remove('auth-pending');
   init();
@@ -47,6 +49,9 @@ function init() {
   const DOW_SHORT = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   const DOW_LONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const WINDOW_DAYS = 6;
+  const bookedSlotKeys = new Set();
+  const loadedAvailabilityDates = new Set();
+  let availabilityLoading = false;
 
   const $ = id => document.getElementById(id);
   const svg = inner => '<svg viewBox="0 0 24 24" aria-hidden="true">' + inner + '</svg>';
@@ -59,6 +64,7 @@ function init() {
   let step = 1;
   let petId = null;
   let serviceIds = [];
+  const customServices = [];
   let slot = null;                    // { dateKey, time }
   let viewYear = today.getFullYear();
   let viewMonth = today.getMonth();
@@ -103,10 +109,11 @@ function init() {
   }
 
   const getPet = () => PA.getPets().find(p => p.id === petId);
-  const getSelectedServices = () => serviceIds.map(id => SERVICES.find(service => service.id === id));
+  const allServices = () => SERVICES.concat(customServices);
+  const getSelectedServices = () => serviceIds.map(id => allServices().find(service => service.id === id));
   const getServiceNames = () => serviceIds.map(id => id === 'other'
     ? 'Other: ' + $('other-treatment').value.trim()
-    : SERVICES.find(service => service.id === id).title);
+    : allServices().find(service => service.id === id)?.title || '');
   const getTotalMinutes = () => getSelectedServices().reduce((total, service) =>
     total + (service ? service.minutes : OTHER_SERVICE_MINUTES), 0);
   const hasValidTreatments = () => serviceIds.length > 0 &&
@@ -115,9 +122,14 @@ function init() {
   // ----- header -----
   $('user-avatar').textContent = PA.initials(session);
   $('user-name').textContent = session.fullName || session.firstName;
-  $('logout-btn').addEventListener('click', () => {
-    PA.logout();
-    location.href = '../landingpage/landingPage.html';
+  $('logout-btn').addEventListener('click', async () => {
+    try {
+      await PA.logout();
+      location.href = '../landingpage/landingPage.html';
+    } catch (error) {
+      console.error('Could not sign out.', error);
+      window.alert('Could not sign out. Please check your connection and try again.');
+    }
   });
   $('news-form').addEventListener('submit', e => { e.preventDefault(); e.target.reset(); toast('Subscribed to newsletter!'); });
 
@@ -150,7 +162,11 @@ function init() {
     $('step-sub').hidden = n === 3;
     renderStepper();
     renderSummary();
-    if (n === 3) { renderCalendar(); renderWeek(); }
+    if (n === 3) {
+      renderCalendar();
+      renderWeek();
+      loadAvailabilityForWindow();
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -177,10 +193,24 @@ function init() {
     if (step === 1) location.href = '../homepage/Homepage.html';
     else goStep(step - 1);
   });
-  $('next-btn').addEventListener('click', () => {
+  $('next-btn').addEventListener('click', async () => {
     if (step === 1 && petId) goStep(2);
     else if (step === 2 && hasValidTreatments()) goStep(3);
-    else if (step === 3 && slot) confirmBooking();
+    else if (step === 3 && slot) {
+      const next = $('next-btn');
+      next.disabled = true;
+      try {
+        await confirmBooking();
+      } catch (error) {
+        console.error('Could not save appointment to Firestore.', error);
+        toast(error.message && error.message.includes('just taken')
+          ? 'That time was just booked. Please choose another open time.'
+          : 'Your appointment could not be submitted. Please check your connection and try again.');
+        slot = null;
+        if (step === 3) loadAvailabilityForWindow(true);
+        renderSummary();
+      }
+    }
   });
 
   // ============================================================
@@ -267,7 +297,7 @@ function init() {
   // STEP 2: TREATMENT
   // ============================================================
   function renderServices() {
-    const services = SERVICES.concat([{
+    const services = allServices().concat([{
       id: 'other',
       title: 'Other treatment',
       minutes: OTHER_SERVICE_MINUTES,
@@ -286,6 +316,28 @@ function init() {
     const otherSelected = serviceIds.includes('other');
     $('other-treatment-field').hidden = !otherSelected;
     $('other-treatment').required = otherSelected;
+  }
+
+  async function loadCustomServices() {
+    const message = $('service-load-error');
+    try {
+      const { getServices } = await import('../shared/firebase.js');
+      const services = await getServices();
+      customServices.splice(0, customServices.length, ...services.map(service => ({
+        id: 'custom-' + service.id,
+        title: service.name,
+        minutes: service.minutes,
+        desc: service.description,
+        icon: '<path d="M12 5v14M5 12h14"/>'
+      })));
+      renderServices();
+    } catch (error) {
+      console.error('Could not load custom services for booking.', error);
+      if (message) {
+        message.hidden = false;
+        message.textContent = 'Additional services are temporarily unavailable. Please try again later.';
+      }
+    }
   }
   $('service-list').addEventListener('click', e => {
     const card = e.target.closest('[data-service]');
@@ -316,7 +368,11 @@ function init() {
     const v = Math.min(Math.max(ym(y, m), minYM), maxYM);   // stay inside the bookable range
     viewYear = Math.floor(v / 12);
     viewMonth = v % 12;
+    const lastDay = new Date(viewYear, viewMonth + 1, 0).getDate();
+    windowStart = new Date(viewYear, viewMonth, Math.min(windowStart.getDate(), lastDay));
     renderCalendar();
+    renderWeek();
+    loadAvailabilityForWindow();
   }
 
   function renderWeek() {
@@ -343,8 +399,21 @@ function init() {
         button.className = 'slot';
         button.textContent = time;
         button.setAttribute('aria-label', longDate(date) + ' at ' + time);
+        const dateKey = key(date);
+        const slotKey = dateKey + '|' + time.toUpperCase();
+        const availabilityReady = loadedAvailabilityDates.has(dateKey);
+        const isPast = new Date(date.getFullYear(), date.getMonth(), date.getDate(), to24(time).h, to24(time).m) <= new Date();
+        const isBooked = bookedSlotKeys.has(slotKey);
+        button.disabled = !availabilityReady || availabilityLoading || isPast || isBooked;
+        if (isBooked) {
+          button.classList.add('booked');
+          button.setAttribute('aria-label', longDate(date) + ' at ' + time + ', unavailable');
+        } else if (!availabilityReady || availabilityLoading) {
+          button.setAttribute('aria-label', longDate(date) + ' at ' + time + ', checking availability');
+        }
         if (slot && slot.dateKey === key(date) && slot.time === time) button.classList.add('selected');
         button.addEventListener('click', () => {
+          if (button.disabled) return;
           slot = { dateKey: key(date), time };
           renderWeek();
           renderSummary();
@@ -365,10 +434,50 @@ function init() {
     });
   }
 
+  async function loadAvailabilityForWindow(force = false) {
+    if (availabilityLoading) return;
+    const dates = Array.from({ length: WINDOW_DAYS }, (_, index) => key(addDays(windowStart, index)));
+    if (!force && dates.every(date => loadedAvailabilityDates.has(date))) return;
+    const requestedStart = dates[0];
+    availabilityLoading = true;
+    const message = $('availability-error');
+    message.hidden = false;
+    message.textContent = 'Checking the calendar for open times…';
+    renderWeek();
+    try {
+      const { getBookedAppointmentSlots } = await import('../shared/firebase.js');
+      const slots = await getBookedAppointmentSlots(dates[0], dates[dates.length - 1]);
+      bookedSlotKeys.forEach(slotKey => {
+        if (dates.some(date => slotKey.startsWith(date + '|'))) bookedSlotKeys.delete(slotKey);
+      });
+      dates.forEach(date => loadedAvailabilityDates.add(date));
+      slots.forEach(booked => bookedSlotKeys.add(
+        booked.date + '|' + String(booked.time || '').toUpperCase()
+      ));
+      message.hidden = true;
+      if (slot && bookedSlotKeys.has(slot.dateKey + '|' + slot.time.toUpperCase())) {
+        slot = null;
+        renderSummary();
+      }
+    } catch (error) {
+      console.error('Could not load appointment availability from the clinic calendar.', error);
+      message.textContent = error.code === 'permission-denied'
+        ? 'Firebase denied access to appointment availability. Publish the latest firestore.rules, including the appointmentSlots read rule.'
+        : error.code === 'failed-precondition'
+          ? 'Firebase needs an index for this availability query. Check the browser console for the index link.'
+          : error.message || 'Could not load appointment availability. Check your Firebase connection and try again.';
+    } finally {
+      availabilityLoading = false;
+      renderWeek();
+      if (key(windowStart) !== requestedStart) loadAvailabilityForWindow();
+    }
+  }
+
   function selectCalendarDate(date) {
     windowStart = date;
     renderCalendar();
     renderWeek();
+    loadAvailabilityForWindow();
   }
 
   function renderCalendar() {
@@ -406,7 +515,7 @@ function init() {
   // ============================================================
   // CONFIRM + CONFIRMATION SCREEN
   // ============================================================
-  function confirmBooking() {
+  async function confirmBooking() {
     const pet = getPet();
     if (!pet || !hasValidTreatments() || !slot) return;
     const date = fromKey(slot.dateKey);
@@ -414,8 +523,7 @@ function init() {
     const totalMinutes = getTotalMinutes();
     const ref = 'PA-' + String(date.getFullYear()).slice(2) + String(date.getMonth() + 1).padStart(2, '0') +
                 String(date.getDate()).padStart(2, '0') + '-' + String(Math.floor(1000 + Math.random() * 9000));
-    lastBooked = PA.addAppointment({
-      id: 'appt-' + Date.now(),
+    lastBooked = await PA.addAppointment({
       ref,
       email: session.email,
       petId: pet.id, petName: pet.name, petSpecies: pet.species,
@@ -471,6 +579,7 @@ function init() {
   // ----- start -----
   renderPets();
   renderServices();
+  loadCustomServices();
   goStep(1);
   window.scrollTo(0, 0);
 }
