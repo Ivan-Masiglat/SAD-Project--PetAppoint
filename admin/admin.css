@@ -62,7 +62,7 @@
 .status-badge{display:inline-flex;align-items:center;width:max-content;padding:4px 8px;border-radius:12px;background:#eef1f1;color:#566a70;font-size:9px;font-weight:700;white-space:nowrap}
 .status-pending{background:#fff2da;color:#93651d}
 .status-confirmed{background:#e3f2e9;color:#28714d}
-.status-completed{background:#dff2e5;color:#28714d}
+.status-completed{background:#dcebf7;color:#245d82}
 .status-cancelled{background:#e8e8e8;color:#687176}
 .appointment-cancelled td{background:#f3f3f3;color:#7a8386}
 .appointment-cancelled td strong{color:#7a8386}
@@ -124,3 +124,5 @@
 @keyframes admin-loading-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.admin-loading-spinner{animation:none}}
 @media(prefers-reduced-motion:reduce){.admin-shell{animation:none}.admin-leaving .admin-shell{opacity:1;transform:none;transition:none}}
+.nav-link:hover:not(.disabled):not(.active),.nav-link:focus-visible:not(.disabled):not(.active){background:rgba(255,255,255,.2);box-shadow:inset 3px 0 var(--orange)}
+.nav-link.active:hover,.nav-link.active:focus-visible{background:#ffd078;color:#30291e;}
