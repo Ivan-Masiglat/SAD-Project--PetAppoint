@@ -118,4 +118,9 @@
 @media(max-width:1050px){.calendar-layout{grid-template-columns:1fr}.day-panel{min-height:0}.client-grid,.service-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:680px){.admin-calendar,.day-panel{padding:15px}.calendar-toolbar{align-items:flex-start}.calendar-toolbar h2{font-size:15px}.calendar-toolbar p{max-width:170px}.month-grid{gap:3px}.month-blank,.month-day{min-height:53px}.month-day{border-radius:8px}.appointment-dot{top:5px;right:5px}.calendar-legend{font-size:9px}.client-grid,.service-grid{grid-template-columns:1fr}.directory-summary{gap:9px}.client-card{padding:15px}}
 @keyframes admin-page-enter{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.admin-loading{position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;gap:12px;background:rgba(240, 236, 229, 0.5);color:var(--ink);font-size:13px;font-weight:600;transition:opacity .2s ease,visibility .2s ease}
+.admin-loading[hidden]{display:none}
+.admin-loading-spinner{width:24px;height:24px;border:3px solid #c6d9d5;border-top-color:var(--teal);border-radius:50%;animation:admin-loading-spin .75s linear infinite}
+@keyframes admin-loading-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.admin-loading-spinner{animation:none}}
 @media(prefers-reduced-motion:reduce){.admin-shell{animation:none}.admin-leaving .admin-shell{opacity:1;transform:none;transition:none}}

@@ -101,7 +101,9 @@
 
   const accounts = readStorage(STORAGE_KEYS.accounts, {});
   let appointments = [];
+  let clientProfiles = [];
   let safeAppointments = appointments;
+  let selectedAppointmentStatus = 'pending';
   let refreshCalendar = () => {};
   let refreshClients = () => {};
   const statusOf = appointment => String(appointment.status || 'unknown').toLowerCase();
@@ -118,8 +120,12 @@
   };
   const ownerFor = email => safeAccounts[String(email || '').toLowerCase()] || {};
   const ownerName = appointment => {
-    const owner = ownerFor(appointment.email);
-    const name = [owner.firstName, owner.lastName].filter(Boolean).join(' ').trim();
+    const email = String(appointment.email || '').toLowerCase();
+    const localOwner = ownerFor(email);
+    const remoteOwner = clientProfiles.find(profile =>
+      String(profile.email || '').toLowerCase() === email) || {};
+    const name = [localOwner.firstName || remoteOwner.firstName, localOwner.lastName || remoteOwner.lastName]
+      .filter(Boolean).join(' ').trim();
     return name || (appointment.email ? String(appointment.email) : 'Client');
   };
   const appointmentDate = appointment => dateFromKey(appointment.date);
@@ -144,16 +150,19 @@
     renderDashboard();
     renderAppointments();
     renderCalendar();
-    renderClients();
-    renderServices();
+    return Promise.all([renderClients(), renderServices(), loadAppointmentOwnerProfiles()]);
   }).catch(error => {
     console.error('Could not load appointments from Firestore.', error);
     window.alert('Appointments could not be loaded from Firebase. Check your connection and Firestore rules, then reload.');
     renderDashboard();
     renderAppointments();
     renderCalendar();
-    renderClients();
-    renderServices();
+    return Promise.all([renderClients(), renderServices(), loadAppointmentOwnerProfiles()]);
+  }).finally(() => {
+    const loadingIndicator = document.getElementById('admin-loading');
+    const mainArea = document.querySelector('.main-area');
+    if (loadingIndicator) loadingIndicator.hidden = true;
+    if (mainArea) mainArea.setAttribute('aria-busy', 'false');
   });
 
   async function loadAppointments() {
@@ -171,6 +180,16 @@
     }, error => {
       console.error('Could not receive live appointment updates from Firestore.', error);
       window.alert('Live appointment updates stopped. Reload this page to reconnect.');
+    });
+  }
+
+  function loadAppointmentOwnerProfiles() {
+    if (!document.querySelector('.appointment-panel')) return Promise.resolve();
+    return import('../shared/firebase.js').then(firebase => firebase.getClientProfiles()).then(profiles => {
+      clientProfiles = profiles;
+      renderAppointments();
+    }).catch(error => {
+      console.error('Could not load client profiles for appointment owners.', error);
     });
   }
 
@@ -297,23 +316,27 @@
     }
     updateCounts();
 
-    let selectedStatus = 'pending';
     const rescheduleDialog = document.getElementById('reschedule-dialog');
     const rescheduleForm = document.getElementById('reschedule-form');
     const rescheduleDate = document.getElementById('reschedule-date');
     const rescheduleTime = document.getElementById('reschedule-time');
     const rescheduleError = document.getElementById('reschedule-error');
     let reschedulingAppointment = null;
+    filters.forEach(filter => {
+      const selected = filter.dataset.status === selectedAppointmentStatus;
+      filter.classList.toggle('selected', selected);
+      filter.setAttribute('aria-selected', String(selected));
+    });
     function updateTable() {
       const search = document.querySelector('.appointment-panel')?.dataset.search || '';
-      const source = selectedStatus === 'all' ? allAppointments() : safeAppointments;
+      const source = selectedAppointmentStatus === 'all' ? allAppointments() : safeAppointments;
       const matching = source.filter(appointment => {
         const owner = ownerName(appointment);
         const searchText = [
           appointment.ref, owner, appointment.email, appointment.petName,
           appointment.service, appointment.time, appointment.date
         ].join(' ').toLowerCase();
-        return (selectedStatus === 'all' || statusOf(appointment) === selectedStatus) &&
+        return (selectedAppointmentStatus === 'all' || statusOf(appointment) === selectedAppointmentStatus) &&
           searchText.includes(search);
       }).sort((left, right) => {
         const leftDate = (left.date || '') + ' ' + (left.time || '');
@@ -343,16 +366,17 @@
         const detail = empty.querySelector('p');
         if (title) title.textContent = source.length
           ? 'No matching appointments'
-          : selectedStatus === 'pending' ? 'No pending requests' : 'No appointments yet';
+          : selectedAppointmentStatus === 'pending' ? 'No pending requests' : 'No appointments yet';
         if (detail) detail.textContent = source.length
           ? 'Try another search or status filter.'
-          : selectedStatus === 'pending'
+          : selectedAppointmentStatus === 'pending'
             ? 'New client booking requests will appear here for approval.'
             : 'Accepted bookings will appear here once approved by the clinic.';
       }
     }
 
-    tbody.addEventListener('click', async event => {
+    if (!tbody.dataset.actionsBound) {
+      tbody.addEventListener('click', async event => {
       const reopenButton = event.target.closest('[data-reschedule-appointment]');
       if (reopenButton && rescheduleDialog && rescheduleDate && rescheduleTime) {
         reschedulingAppointment = appointments.find(item => item.id === reopenButton.dataset.rescheduleAppointment);
@@ -367,21 +391,17 @@
       if (!button) return;
       button.disabled = true;
       if (await updateAppointmentStatus(button.dataset.appointmentId, button.dataset.appointmentStatus)) {
-        selectedStatus = 'all';
-        filters.forEach(filter => {
-          const selected = filter.dataset.status === 'all';
-          filter.classList.toggle('selected', selected);
-          filter.setAttribute('aria-selected', String(selected));
-        });
         updateCounts();
         updateTable();
       } else {
         button.textContent = 'Try again';
         button.disabled = false;
       }
-    });
+      });
+      tbody.dataset.actionsBound = 'true';
+    }
 
-    if (rescheduleForm && rescheduleDialog && rescheduleDate && rescheduleTime) {
+    if (rescheduleForm && rescheduleDialog && rescheduleDate && rescheduleTime && !rescheduleForm.dataset.handlersBound) {
       rescheduleForm.addEventListener('submit', async event => {
         event.preventDefault();
         if (!reschedulingAppointment || statusOf(reschedulingAppointment) !== 'cancelled') return;
@@ -405,12 +425,6 @@
         delete reschedulingAppointment.previousStatus;
         rescheduleDialog.close();
         reschedulingAppointment = null;
-        selectedStatus = 'all';
-        filters.forEach(filter => {
-          const selected = filter.dataset.status === 'all';
-          filter.classList.toggle('selected', selected);
-          filter.setAttribute('aria-selected', String(selected));
-        });
         updatePendingNavCount();
         updateCounts();
         updateTable();
@@ -425,22 +439,28 @@
       rescheduleDialog.addEventListener('click', event => {
         if (event.target === rescheduleDialog) rescheduleDialog.close();
       });
+      rescheduleForm.dataset.handlersBound = 'true';
     }
 
-    filters.forEach(button => button.addEventListener('click', () => {
-      filters.forEach(filter => {
-        const selected = filter === button;
-        filter.classList.toggle('selected', selected);
-        filter.setAttribute('aria-selected', String(selected));
+    filters.forEach(button => {
+      if (button.dataset.filterBound) return;
+      button.addEventListener('click', () => {
+        filters.forEach(filter => {
+          const selected = filter === button;
+          filter.classList.toggle('selected', selected);
+          filter.setAttribute('aria-selected', String(selected));
+        });
+        selectedAppointmentStatus = button.dataset.status || 'all';
+        updateTable();
       });
-      selectedStatus = button.dataset.status || 'all';
-      updateTable();
-    }));
+      button.dataset.filterBound = 'true';
+    });
     const searchInput = document.querySelector('.search-box input');
-    if (searchInput) searchInput.addEventListener('input', () => {
+    if (searchInput && !searchInput.dataset.appointmentSearchBound) searchInput.addEventListener('input', () => {
       document.querySelector('.appointment-panel').dataset.search = searchInput.value.trim().toLowerCase();
       updateTable();
     });
+    if (searchInput) searchInput.dataset.appointmentSearchBound = 'true';
     updateTable();
   }
 
@@ -710,7 +730,7 @@
     if (searchInput) searchInput.addEventListener('input', updateClients);
     refreshClients = updateClients;
     updateClients();
-    import('../shared/firebase.js').then(firebase => firebase.getClientProfiles()).then(profiles => {
+    return import('../shared/firebase.js').then(firebase => firebase.getClientProfiles()).then(profiles => {
       remoteClients = profiles;
       updateClients();
     }).catch(error => {
@@ -828,7 +848,7 @@
       }
     });
     updateServices();
-    import('../shared/firebase.js').then(async firebase => {
+    return import('../shared/firebase.js').then(async firebase => {
       const [services, overrides] = await Promise.all([
         firebase.getServices(),
         firebase.getServicePriceOverrides()

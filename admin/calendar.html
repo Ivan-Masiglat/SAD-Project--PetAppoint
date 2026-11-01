@@ -12,6 +12,7 @@
 </head>
 <body>
   <div class="admin-shell">
+    <div class="admin-loading" id="admin-loading" role="status" aria-live="polite"><span class="admin-loading-spinner" aria-hidden="true"></span><span>Loading admin workspace…</span></div>
     <aside class="sidebar" id="sidebar">
       <a class="brand" href="dashboard.html" aria-label="PetAppoint admin home"><img src="../images/logo.png" alt=""><span>PetAppoint</span></a>
       <p class="nav-label">WORKSPACE</p>
@@ -24,7 +25,7 @@
       </nav>
       <div class="sidebar-bottom"><a class="nav-link disabled" aria-disabled="true"><span class="nav-icon">⚙</span>Settings</a><a class="logout-link" href="../landingpage/landingPage.html">Log out</a></div>
     </aside>
-    <main class="main-area">
+    <main class="main-area" aria-busy="true">
       <header class="topbar"><button class="mobile-menu" id="menu-toggle" type="button" aria-label="Open navigation">☰</button><div class="topbar-date" id="today-label"></div><div class="topbar-tools"><label class="search-box"><span aria-hidden="true">⌕</span><input type="search" placeholder="Search owner, pet, or service" aria-label="Search appointments"></label><button class="avatar" type="button" aria-label="Administrator account">AD</button></div></header>
       <section class="page-heading appointments-heading"><div><p class="eyebrow">CLINIC OVERVIEW</p><h1>Calendar</h1><p class="subtitle">See appointments by day and plan the clinic’s schedule.</p></div></section>
       <section class="calendar-layout">
