@@ -66,6 +66,7 @@ function init() {
   let serviceIds = [];
   const customServices = [];
   let slot = null;                    // { dateKey, time }
+  let pendingRequestedSlot = null;
   let viewYear = today.getFullYear();
   let viewMonth = today.getMonth();
   let windowStart = new Date(today);  // first of the 6 days shown
@@ -79,6 +80,27 @@ function init() {
   const longDate = d => DOW_LONG[d.getDay()] + ', ' + MONTHS_LONG[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
   const shortDate = d => DOW_SHORT[d.getDay()] + ', ' + MONTHS[d.getMonth()] + ' ' + d.getDate();
   const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const requestedDateKey = new URLSearchParams(location.search).get('date');
+  if (requestedDateKey && /^\d{4}-\d{2}-\d{2}$/.test(requestedDateKey)) {
+    const requestedDate = fromKey(requestedDateKey);
+    const lastBookableDate = new Date(today.getFullYear() + 1, 11, 31);
+    if (key(requestedDate) === requestedDateKey && requestedDate >= today && requestedDate <= lastBookableDate) {
+      windowStart = requestedDate;
+      viewYear = requestedDate.getFullYear();
+      viewMonth = requestedDate.getMonth();
+      const requestedTime = new URLSearchParams(location.search).get('time');
+      const validTimes = MORNING_TIME_SLOTS.concat(afternoonTimeSlots(
+        requestedDate.getDay() === 0 ? 17 : 20
+      ));
+      if (validTimes.includes(requestedTime)) {
+        const { h, m } = to24(requestedTime);
+        if (new Date(requestedDate.getFullYear(), requestedDate.getMonth(), requestedDate.getDate(), h, m) > now) {
+          pendingRequestedSlot = { dateKey: requestedDateKey, time: requestedTime };
+        }
+      }
+    }
+  }
 
   function to24(time) {
     const [hm, ap] = time.split(' ');
@@ -455,6 +477,13 @@ function init() {
         booked.date + '|' + String(booked.time || '').toUpperCase()
       ));
       message.hidden = true;
+      if (pendingRequestedSlot && dates.includes(pendingRequestedSlot.dateKey)) {
+        if (!bookedSlotKeys.has(pendingRequestedSlot.dateKey + '|' + pendingRequestedSlot.time.toUpperCase())) {
+          slot = pendingRequestedSlot;
+        }
+        pendingRequestedSlot = null;
+        renderSummary();
+      }
       if (slot && bookedSlotKeys.has(slot.dateKey + '|' + slot.time.toUpperCase())) {
         slot = null;
         renderSummary();

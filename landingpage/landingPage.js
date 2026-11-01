@@ -139,9 +139,10 @@ function showView(viewId, linkEl) {
   // Update active nav link
   const navLinks = document.querySelectorAll('#nav-list a');
   navLinks.forEach(link => link.classList.remove('active'));
-  if (linkEl) {
-    linkEl.classList.add('active');
-  }
+  const activeLink = linkEl || (viewId === 'home'
+    ? document.getElementById('home-nav-link')
+    : document.querySelector(`#nav-list a[href="#${viewId}"]`));
+  if (activeLink) activeLink.classList.add('active');
 
   // Close mobile nav menu if open
   const navList = document.getElementById('nav-list');
@@ -197,13 +198,33 @@ function continueToBooking() {
     return;
   }
   if (session?.role === 'client') {
-    window.location.href = '../booking/booking.html';
+    window.location.href = bookingDestination(
+      bookingCalendarState?.selectedDateKey,
+      bookingCalendarState?.selectedTime
+    );
     return;
   }
   const url = new URL(window.location.href);
   url.searchParams.set('next', 'booking');
+  if (bookingCalendarState?.selectedDateKey) {
+    url.searchParams.set('date', bookingCalendarState.selectedDateKey);
+  } else {
+    url.searchParams.delete('date');
+  }
+  if (bookingCalendarState?.selectedTime) url.searchParams.set('time', bookingCalendarState.selectedTime);
+  else url.searchParams.delete('time');
   window.history.replaceState({}, '', url);
   openModal('signup');
+}
+
+function bookingDestination(
+  dateKey = new URLSearchParams(window.location.search).get('date'),
+  time = new URLSearchParams(window.location.search).get('time')
+) {
+  const url = new URL('../booking/booking.html', window.location.href);
+  if (dateKey) url.searchParams.set('date', dateKey);
+  if (dateKey && time) url.searchParams.set('time', time);
+  return url.href;
 }
 
 function formatBookingDate(date) {
@@ -457,7 +478,7 @@ async function handleAuth(event, type) {
     }
     const next = new URLSearchParams(window.location.search).get('next');
     await finishAuthRedirect(form, 'Signed in! Redirecting...', next === 'booking'
-      ? '../booking/booking.html'
+      ? bookingDestination()
       : '../homepage/Homepage.html');
     return;
   }
@@ -499,7 +520,7 @@ async function handleAuth(event, type) {
     }, pw[0].value);
     const next = new URLSearchParams(window.location.search).get('next');
     await finishAuthRedirect(form, 'Account created! Redirecting...', next === 'booking'
-      ? '../booking/booking.html'
+      ? bookingDestination()
       : '../homepage/Homepage.html');
   } catch (error) {
     console.error('Firebase client registration failed.', error);
