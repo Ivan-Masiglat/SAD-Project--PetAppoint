@@ -583,6 +583,10 @@ button {
   font-weight: 650;
 }
 
+.pet-dialog label[hidden] {
+  display: none;
+}
+
 .pet-dialog input,
 .pet-dialog select {
   display: block;
