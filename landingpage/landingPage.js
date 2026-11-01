@@ -18,6 +18,32 @@ let bookingCalendarState = null;
 // ============================================================
 window.addEventListener('DOMContentLoaded', () => {
   const session = typeof PA !== 'undefined' ? PA.getSession() : null;
+  const inquiryForm = document.getElementById('inquiry-form');
+  let inquirySuccessTimer;
+  let inquiryHideTimer;
+  inquiryForm.addEventListener('submit', event => {
+    event.preventDefault();
+    const successMessage = document.getElementById('inquiry-success');
+    clearTimeout(inquirySuccessTimer);
+    clearTimeout(inquiryHideTimer);
+    successMessage.hidden = false;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => successMessage.classList.add('is-visible'));
+    });
+    inquiryForm.reset();
+    inquirySuccessTimer = setTimeout(() => {
+      successMessage.classList.remove('is-visible');
+      inquiryHideTimer = setTimeout(() => {
+        successMessage.hidden = true;
+      }, 250);
+    }, 4000);
+  });
+
+  if (session) {
+    document.getElementById('inquiry-name').value = session.fullName || '';
+    document.getElementById('inquiry-email').value = session.email || '';
+    document.getElementById('inquiry-phone').value = session.phone || '';
+  }
   const authNavButton = document.getElementById('auth-nav-button');
   if (session && authNavButton) {
     const avatar = document.createElement('span');

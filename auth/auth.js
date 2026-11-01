@@ -47,6 +47,7 @@ const PA = (() => {
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       fullName: (firstName.trim() + ' ' + lastName.trim()).trim(),
+      phone: phone.trim(),
       role: 'client'
     };
     if (!write(K.session, session)) {
@@ -64,6 +65,7 @@ const PA = (() => {
       firstName: profile.firstName,
       lastName: profile.lastName,
       fullName: (profile.firstName + ' ' + profile.lastName).trim(),
+      phone: profile.phone || '',
       role: 'client'
     };
     if (!write(K.session, session)) {

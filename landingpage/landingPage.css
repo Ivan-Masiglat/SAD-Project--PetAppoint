@@ -458,6 +458,55 @@ form.stack {
   box-shadow: var(--shadow);
 }
 
+.inquiry-success {
+  position: fixed;
+  z-index: 110;
+  bottom: 1.5rem;
+  left: 50%;
+  display: flex;
+  align-items: flex-start;
+  gap: .85rem;
+  width: min(560px, calc(100vw - 2rem));
+  margin: 0;
+  padding: 1rem 1.2rem;
+  color: #174b37;
+  background: #e4f4eb;
+  border: 1px solid #9bcdb0;
+  border-left: 5px solid #278354;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(22, 49, 59, .2);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 8px);
+  transition: opacity .25s ease, transform .25s ease;
+}
+
+.inquiry-success[hidden] {
+  display: none;
+}
+
+.inquiry-success.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translate(-50%, 0);
+}
+
+.inquiry-success-icon {
+  display: grid;
+  width: 1.6rem;
+  height: 1.6rem;
+  flex: none;
+  place-items: center;
+  color: #fff;
+  background: #278354;
+  border-radius: 50%;
+  font-weight: 700;
+}
+
+.inquiry-success p {
+  margin-top: .15rem;
+}
+
 label {
   font-size: .88rem;
   font-weight: 600;
