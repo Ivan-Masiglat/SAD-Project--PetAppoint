@@ -348,17 +348,23 @@ function switchTab(tab) {
 async function handleAuth(event, type) {
   event.preventDefault();
   const form = event.target;
+  if (!form.reportValidity()) return;
 
   if (type === 'login') {
+    const submit = form.querySelector('[type="submit"]');
+    submit.disabled = true;
+    submit.textContent = 'Signing in...';
     const email = form.querySelector('input[type="email"]').value;
     const password = form.querySelector('input[type="password"]').value;
     if (email.trim().toLowerCase() === 'admin@gmail.com') {
       try {
         await PA.loginAdmin(email, password);
-        window.location.href = '../admin/dashboard.html';
+        await finishAuthRedirect(form, 'Signed in! Redirecting...', '../admin/dashboard.html');
       } catch (error) {
         console.error('Firebase admin sign-in failed.', error);
         showToast('Admin sign-in failed. Check the email and password, then try again.');
+        submit.disabled = false;
+        submit.textContent = 'Login';
       }
       return;
     }
@@ -369,18 +375,33 @@ async function handleAuth(event, type) {
       showToast(error.code === 'auth/invalid-credential'
         ? 'Email or password is incorrect.'
         : 'Could not sign in. Check your email and password, then try again.');
+      submit.disabled = false;
+      submit.textContent = 'Login';
       return;
     }
     const next = new URLSearchParams(window.location.search).get('next');
-    window.location.href = next === 'booking'
+    await finishAuthRedirect(form, 'Signed in! Redirecting...', next === 'booking'
       ? '../booking/booking.html'
-      : '../homepage/Homepage.html';
+      : '../homepage/Homepage.html');
     return;
   }
 
   // SIGN UP
   const text = form.querySelectorAll('input[type="text"]');
+  const firstName = text[0].value.trim();
+  const lastName = text[1].value.trim();
   const email = form.querySelector('input[type="email"]').value;
+  const phone = form.querySelector('input[type="tel"]').value.trim();
+  const namePattern = /^[\p{L}\p{M}]+(?:[ '-][\p{L}\p{M}]+)*$/u;
+  const phonePattern = /^(?:09|\+63 ?9)\d{2}[- ]?\d{3}[- ]?\d{4}$/;
+  if (!namePattern.test(firstName) || !namePattern.test(lastName)) {
+    showToast('Names can contain letters, spaces, apostrophes, or hyphens only.');
+    return;
+  }
+  if (!phonePattern.test(phone)) {
+    showToast('Enter a valid Philippine mobile number.');
+    return;
+  }
   if (email.trim().toLowerCase() === 'admin@gmail.com') {
     showToast('This email is reserved for the clinic administrator.');
     return;
@@ -392,17 +413,18 @@ async function handleAuth(event, type) {
   }
   const submit = form.querySelector('[type="submit"]');
   submit.disabled = true;
+  submit.textContent = 'Creating account...';
   try {
     await PA.registerClient({
-      firstName: text[0].value,
-      lastName: text[1].value,
+      firstName,
+      lastName,
       email,
-      phone: form.querySelector('input[type="tel"]').value
+      phone
     }, pw[0].value);
     const next = new URLSearchParams(window.location.search).get('next');
-    window.location.href = next === 'booking'
+    await finishAuthRedirect(form, 'Account created! Redirecting...', next === 'booking'
       ? '../booking/booking.html'
-      : '../homepage/Homepage.html';
+      : '../homepage/Homepage.html');
   } catch (error) {
     console.error('Firebase client registration failed.', error);
     const messages = {
@@ -415,7 +437,16 @@ async function handleAuth(event, type) {
       'Could not create the account. Check your connection and try again.');
   } finally {
     submit.disabled = false;
+    submit.textContent = 'Sign Up';
   }
+}
+
+async function finishAuthRedirect(form, message, destination) {
+  const submit = form.querySelector('[type="submit"]');
+  submit.textContent = message;
+  showToast(message);
+  await new Promise(resolve => setTimeout(resolve, 700));
+  window.location.href = destination;
 }
 
 // ============================================================

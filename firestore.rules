@@ -16,12 +16,14 @@ service cloud.firestore {
         && request.resource.data.firstName is string
         && request.resource.data.firstName.size() > 0
         && request.resource.data.firstName.size() <= 80
+        && request.resource.data.firstName.matches("^[\\p{L}\\p{M}]+([ '-][\\p{L}\\p{M}]+)*$")
         && request.resource.data.lastName is string
         && request.resource.data.lastName.size() > 0
         && request.resource.data.lastName.size() <= 80
+        && request.resource.data.lastName.matches("^[\\p{L}\\p{M}]+([ '-][\\p{L}\\p{M}]+)*$")
         && request.resource.data.email == request.auth.token.email
         && request.resource.data.phone is string
-        && request.resource.data.phone.size() <= 30
+        && request.resource.data.phone.matches("^(09|\\+63 ?9)[0-9]{2}[- ]?[0-9]{3}[- ]?[0-9]{4}$")
         && request.resource.data.createdAt == request.time;
       allow update, delete: if false;
     }
