@@ -17,6 +17,56 @@ let bookingCalendarState = null;
 // INITIALIZATION
 // ============================================================
 window.addEventListener('DOMContentLoaded', () => {
+  const session = typeof PA !== 'undefined' ? PA.getSession() : null;
+  const authNavButton = document.getElementById('auth-nav-button');
+  if (session && authNavButton) {
+    const avatar = document.createElement('span');
+    avatar.className = 'account-nav-avatar';
+    avatar.setAttribute('aria-hidden', 'true');
+    avatar.textContent = PA.initials(session);
+
+    const name = document.createElement('span');
+    name.textContent = session.fullName || session.firstName || 'My Account';
+
+    authNavButton.classList.remove('btn', 'btn-primary', 'btn-sm');
+    authNavButton.classList.add('account-nav-button');
+    authNavButton.replaceChildren(avatar, name);
+    const accountMenu = document.getElementById('account-nav-menu');
+    const accountWrap = document.getElementById('account-nav-wrap');
+    authNavButton.onclick = event => {
+      event.stopPropagation();
+      accountMenu.hidden = !accountMenu.hidden;
+      authNavButton.setAttribute('aria-expanded', String(!accountMenu.hidden));
+    };
+    document.getElementById('account-nav-home').addEventListener('click', () => {
+      window.location.href = session.role === 'admin'
+        ? '../admin/dashboard.html'
+        : '../homepage/Homepage.html';
+    });
+    document.getElementById('account-nav-logout').addEventListener('click', async () => {
+      try {
+        await PA.logout();
+        window.location.href = 'landingPage.html';
+      } catch (error) {
+        console.error('Could not sign out.', error);
+        window.alert('Could not sign out. Please check your connection and try again.');
+      }
+    });
+    document.addEventListener('click', event => {
+      if (!accountWrap.contains(event.target)) {
+        accountMenu.hidden = true;
+        authNavButton.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !accountMenu.hidden) {
+        accountMenu.hidden = true;
+        authNavButton.setAttribute('aria-expanded', 'false');
+        authNavButton.focus();
+      }
+    });
+  }
+
   // Update Google Map Embed
   const mapFrame = document.getElementById('map-frame');
   if (mapFrame) {

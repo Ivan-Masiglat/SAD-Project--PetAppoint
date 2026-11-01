@@ -83,12 +83,18 @@
   font-size: .82rem;
 }
 
-.site-footer .footer-column button {
+.site-footer .footer-column button,
+.site-footer .footer-column a {
   color: rgba(255, 255, 255, .94);
   font-size: .85rem;
 }
 
+.site-footer .footer-column a {
+  text-decoration: none;
+}
+
 .site-footer .footer-column button:hover,
+.site-footer .footer-column a:hover,
 .site-footer .foot-links a:hover {
   color: #ffb13b;
 }

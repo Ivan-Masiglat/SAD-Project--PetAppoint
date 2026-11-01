@@ -30,7 +30,15 @@
         <li><a href="#" class="active" id="home-nav-link" onclick="showView('home', this)">Home</a></li>
         <li><a href="#about" onclick="showView('about', this)">About Us</a></li>
         <li><a href="#inquire" onclick="showView('inquire', this)">Inquire</a></li>
-        <li><button class="btn btn-primary btn-sm" onclick="openModal('login')">Login or Sign Up</button></li>
+        <li>
+          <div class="account-nav-wrap" id="account-nav-wrap">
+            <button class="btn btn-primary btn-sm" id="auth-nav-button" aria-haspopup="true" aria-expanded="false" aria-controls="account-nav-menu" onclick="openModal('login')">Login or Sign Up</button>
+            <div class="account-nav-menu" id="account-nav-menu" hidden>
+              <button type="button" id="account-nav-home">My Account</button>
+              <button type="button" id="account-nav-logout">Log out</button>
+            </div>
+          </div>
+        </li>
       </ul>
     </div>
   </header>
