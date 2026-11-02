@@ -99,7 +99,7 @@ body {
     transition: background .16s ease
 }
 
-.nav-link:hover:not(.disabled) {
+.nav-link:hover {
     background: rgba(255, 255, 255, .1)
 }
 
@@ -130,11 +130,6 @@ body {
 
 .nav-link.active .nav-count {
     background: rgba(255, 255, 255, .7)
-}
-
-.nav-link.disabled {
-    opacity: .72;
-    cursor: default
 }
 
 .sidebar-bottom {
@@ -2024,8 +2019,8 @@ td {
     }
 }
 
-.nav-link:hover:not(.disabled):not(.active),
-.nav-link:focus-visible:not(.disabled):not(.active) {
+.nav-link:hover:not(.active),
+.nav-link:focus-visible:not(.active) {
     background: rgba(255, 255, 255, .2);
     box-shadow: inset 3px 0 var(--orange)
 }
