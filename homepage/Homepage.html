@@ -117,6 +117,7 @@
       <h2 id="pet-dialog-title"></h2>
       <div class="pet-profile-view" id="pet-profile-view" hidden>
         <div class="pet-profile-kicker"><span></span>Pet profile</div>
+        <img class="pet-profile-photo" id="pet-profile-photo" alt="" hidden>
         <dl class="pet-profile-details">
           <div><dt>Species</dt><dd id="pet-profile-species"></dd></div>
           <div><dt>Breed</dt><dd id="pet-profile-breed"></dd></div>
@@ -151,6 +152,15 @@
         </div>
         <label id="other-species-field" hidden>Specify species
           <input type="text" name="otherSpecies" maxlength="40" placeholder="e.g. Turtle">
+        </label>
+        <label class="pet-photo-field">Pet picture
+          <button class="pet-photo-trigger" id="pet-photo-trigger" type="button">Click to add photo</button>
+          <input type="file" name="photo" accept="image/png,image/jpeg,image/webp" hidden>
+          <small class="pet-photo-hint" id="pet-photo-hint">PNG, JPG, or WEBP up to 512 KB.</small>
+          <span class="pet-photo-selected" id="pet-photo-selected" hidden>
+            <img class="pet-photo-preview" id="pet-photo-preview" alt="Pet picture preview">
+            <button class="remove-pet-photo" id="remove-pet-photo" type="button">Remove picture</button>
+          </span>
         </label>
         <div class="pet-form-row">
           <label>Breed
@@ -254,13 +264,14 @@
       </div>
       <div class="footer-column">
         <h2>LEGAL</h2>
-        <button class="placeholder-control" type="button">Terms and Conditions</button>
-        <button class="placeholder-control" type="button">Data Privacy</button>
-        <button class="placeholder-control" type="button">Cancellation Policy</button>
+        <button type="button" data-legal="terms">Terms and Conditions</button>
+        <button type="button" data-legal="privacy">Data Privacy</button>
+        <button type="button" data-legal="cancellation">Cancellation Policy</button>
       </div>
     </div>
     <div class="footer-bottom"></div>
   </footer>
+  <script src="../shared/legal.js"></script>
   <script src="../auth/auth.js"></script>
   <script src="homepage.js"></script>
 </body>

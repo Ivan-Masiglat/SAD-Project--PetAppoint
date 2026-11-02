@@ -18,6 +18,10 @@ const SERVICES = [
   { id: 'senior',      title: 'Senior & Special Care', minutes: 40, desc: 'Gentle, accessible care plans for older pets and pets with special needs.',
     icon: '<path d="M20.8 5.7a5.5 5.5 0 0 0-7.8 0L12 6.8l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 22l8.8-8.5a5.5 5.5 0 0 0 0-7.8Z"/>' }
 ];
+const SERVICE_ICON_SYMBOLS = {
+  paw: '🐾', heart: '♡', medical: '✚', syringe: '💉',
+  tooth: '🦷', grooming: '✂', star: '✧', emergency: '⚕'
+};
 
 // Regular appointments pause for lunch; emergency appointments use all 24 hours.
 const MORNING_TIME_SLOTS = ['9:00 AM', '10:00 AM', '11:00 AM'];
@@ -131,7 +135,9 @@ function init() {
   }
 
   const getPet = () => PA.getPets().find(p => p.id === petId);
-  const allServices = () => SERVICES.concat(customServices);
+  const unavailableServiceIds = new Set();
+  const allServices = () => SERVICES.concat(customServices)
+    .filter(service => !unavailableServiceIds.has(service.id));
   const getSelectedServices = () => serviceIds.map(id => allServices().find(service => service.id === id));
   const getServiceNames = () => serviceIds.map(id => id === 'other'
     ? 'Other: ' + $('other-treatment').value.trim()
@@ -238,12 +244,19 @@ function init() {
   // ============================================================
   // STEP 1: PET
   // ============================================================
+  function petPhotoSource(photo) {
+    return typeof photo === 'string' && /^data:image\/(?:png|jpeg|webp);base64,/.test(photo)
+      ? photo : '';
+  }
+
   function renderPets() {
     const pets = PA.getPets();
     const cards = pets.map((p, i) => {
       const detail = [p.breed || p.species, p.sex, petAge(p.birth)].filter(Boolean).join(' · ');
+      const photo = petPhotoSource(p.photo);
       return '<button type="button" class="choice' + (p.id === petId ? ' selected' : '') + '" data-pet="' + esc(p.id) + '">' +
-        '<span class="avatar' + (i % 2 ? ' alt' : '') + '">' + esc(p.name[0].toUpperCase()) + '</span>' +
+        '<span class="avatar' + (i % 2 ? ' alt' : '') + (photo ? ' has-photo' : '') + '">' +
+        (photo ? '<img src="' + esc(photo) + '" alt="">' : esc(p.name[0].toUpperCase())) + '</span>' +
         '<span class="txt"><b>' + esc(p.name) + '</b><small>' + esc(detail) + '</small></span>' +
         '<span class="tick">' + CHECK + '</span></button>';
     });
@@ -266,8 +279,35 @@ function init() {
 
   // ----- add pet dialog -----
   const dlg = $('pet-dialog');
+  const petPhotoInput = $('pet-photo');
+  $('pet-photo-trigger').addEventListener('click', () => petPhotoInput.click());
+  const petPhotoPreview = $('pet-photo-preview');
+  const petPhotoSelected = $('pet-photo-selected');
+  const petPhotoHint = $('pet-photo-hint');
+  let selectedPetPhoto = '';
+  function readPetPhoto(file) {
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 512 * 1024) {
+      return Promise.reject(new Error('Choose a PNG, JPG, or WEBP picture no larger than 512 KB.'));
+    }
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        if (typeof reader.result !== 'string') {
+          reject(new Error('The picture could not be read. Please choose another file.'));
+          return;
+        }
+        resolve(reader.result);
+      }, { once: true });
+      reader.addEventListener('error', () => reject(new Error('The picture could not be read. Please try again.')), { once: true });
+      reader.readAsDataURL(file);
+    });
+  }
   function openPetDialog() {
     $('pet-form').reset();
+    selectedPetPhoto = '';
+    petPhotoPreview.removeAttribute('src');
+    petPhotoSelected.hidden = true;
+    petPhotoHint.textContent = 'PNG, JPG, or WEBP up to 512 KB.';
     $('pet-birth').max = key(today);
     $('pet-birth').min = (today.getFullYear() - 100) + '-01-01';
     updateOtherSpeciesField();
@@ -281,12 +321,27 @@ function init() {
     if (!isOther) $('pet-form').elements.otherSpecies.value = '';
   }
   $('pet-species').addEventListener('change', updateOtherSpeciesField);
+  petPhotoInput.addEventListener('change', async () => {
+    const file = petPhotoInput.files[0];
+    if (!file) return;
+    petPhotoHint.textContent = 'Reading picture…';
+    try {
+      selectedPetPhoto = await readPetPhoto(file);
+      petPhotoPreview.src = selectedPetPhoto;
+      petPhotoSelected.hidden = false;
+      petPhotoHint.textContent = 'Picture ready to save.';
+    } catch (error) {
+      petPhotoInput.value = '';
+      selectedPetPhoto = '';
+      petPhotoHint.textContent = error.message;
+    }
+  });
   function closePetDialog() { dlg.hidden = true; }
   $('pet-close').addEventListener('click', closePetDialog);
   $('pet-cancel').addEventListener('click', closePetDialog);
   dlg.addEventListener('mousedown', e => { if (e.target === dlg) closePetDialog(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && !dlg.hidden) closePetDialog(); });
-  $('pet-form').addEventListener('submit', e => {
+  $('pet-form').addEventListener('submit', async e => {
     e.preventDefault();
     const f = e.target.elements;
     const name = f.name.value.trim();
@@ -300,9 +355,19 @@ function init() {
       return;
     }
     const species = f.species.value === 'Other' ? f.otherSpecies.value.trim() : f.species.value;
+    let photo = selectedPetPhoto;
+    if (petPhotoInput.files[0]) {
+      try {
+        photo = await readPetPhoto(petPhotoInput.files[0]);
+        selectedPetPhoto = photo;
+      } catch (error) {
+        petPhotoHint.textContent = error.message;
+        return;
+      }
+    }
     const saved = PA.addPet({
       name, species, sex: f.sex.value,
-      breed: f.breed.value.trim(), birth
+      breed: f.breed.value.trim(), birth, photo
     });
     if (!saved) {
       toast('Could not save the pet. Please try again.');
@@ -328,9 +393,12 @@ function init() {
     }]);
     $('service-list').innerHTML = services.map(service => {
       const selected = serviceIds.includes(service.id);
+      const icon = service.custom
+        ? esc(SERVICE_ICON_SYMBOLS[service.icon] || SERVICE_ICON_SYMBOLS.paw)
+        : svg(service.icon);
       return '<button type="button" class="choice' + (selected ? ' selected' : '') +
         '" data-service="' + service.id + '" aria-pressed="' + selected + '">' +
-        '<span class="ico">' + svg(service.icon) + '</span>' +
+        '<span class="ico' + (service.custom ? ' custom-service-icon' : '') + '">' + icon + '</span>' +
         '<span class="txt"><b>' + esc(service.title) + '</b><small>' + esc(service.desc) +
         '</small><span class="mins">About ' + service.minutes + ' min</span></span>' +
         '<span class="tick">' + CHECK + '</span></button>';
@@ -343,14 +411,22 @@ function init() {
   async function loadCustomServices() {
     const message = $('service-load-error');
     try {
-      const { getServices } = await import('../shared/firebase.js');
-      const services = await getServices();
-      customServices.splice(0, customServices.length, ...services.map(service => ({
+      const firebase = await import('../shared/firebase.js');
+      const [services, unavailableIds] = await Promise.all([
+        firebase.getServices(),
+        firebase.getUnavailableServiceIds()
+      ]);
+      unavailableServiceIds.clear();
+      unavailableIds.forEach(id => unavailableServiceIds.add(id));
+      customServices.splice(0, customServices.length, ...services
+        .filter(service => !unavailableServiceIds.has(service.id))
+        .map(service => ({
         id: 'custom-' + service.id,
         title: service.name,
         minutes: service.minutes,
         desc: service.description,
-        icon: '<path d="M12 5v14M5 12h14"/>'
+        icon: SERVICE_ICON_SYMBOLS[service.icon] ? service.icon : 'paw',
+        custom: true
       })));
       renderServices();
     } catch (error) {

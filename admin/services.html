@@ -23,10 +23,10 @@
         <a class="nav-link" href="clients.html"><span class="nav-icon">♧</span>Clients &amp; Pets</a>
         <a class="nav-link active" href="services.html" aria-current="page"><span class="nav-icon">◇</span>Services</a>
       </nav>
-      <div class="sidebar-bottom"><a class="nav-link disabled" aria-disabled="true"><span class="nav-icon">⚙</span>Settings</a><a class="logout-link" href="../landingpage/landingPage.html">Log out</a></div>
+      <div class="sidebar-bottom"><a class="logout-link" href="../landingpage/landingPage.html">Log out</a></div>
     </aside>
     <main class="main-area" aria-busy="true">
-      <header class="topbar"><button class="mobile-menu" id="menu-toggle" type="button" aria-label="Open navigation">☰</button><div class="topbar-date" id="today-label"></div><div class="topbar-tools"><label class="search-box"><span aria-hidden="true">⌕</span><input id="service-search" type="search" placeholder="Search services" aria-label="Search services"></label><button class="avatar" type="button" aria-label="Administrator account">AD</button></div></header>
+      <header class="topbar"><button class="mobile-menu" id="menu-toggle" type="button" aria-label="Open navigation">☰</button><div class="topbar-date" id="today-label"></div><div class="topbar-tools"><label class="search-box"><span aria-hidden="true">⌕</span><input id="service-search" type="search" placeholder="Search services" aria-label="Search services"></label><div class="admin-account"><button class="avatar admin-account-button" type="button" aria-label="Administrator account menu" aria-haspopup="true" aria-expanded="false" aria-controls="admin-account-menu">AD</button><div class="admin-account-menu" id="admin-account-menu" hidden><button class="admin-account-logout" type="button">Log out</button></div></div></div></header>
       <section class="page-heading appointments-heading"><div><p class="eyebrow">CLINIC CATALOG</p><h1>Services</h1><p class="subtitle">Review the treatments clients can choose when booking a visit.</p></div></section>
       <section class="panel service-editor">
         <div class="panel-heading"><div><h2>Add a service</h2><p>New services will be available to clients in the booking form.</p></div></div>
@@ -34,6 +34,18 @@
           <label>Service name<input name="name" type="text" maxlength="80" required></label>
           <label>Estimated time (minutes)<input name="minutes" type="number" min="1" max="1440" step="1" required></label>
           <label>Approximate price (PHP)<input name="price" type="number" min="0" max="1000000" step="1" required></label>
+          <label class="service-icon-field">Service icon
+            <select name="icon">
+              <option value="paw">🐾 Paw</option>
+              <option value="heart">♡ Heart</option>
+              <option value="medical">✚ Medical</option>
+              <option value="syringe">💉 Vaccine</option>
+              <option value="tooth">🦷 Dental</option>
+              <option value="grooming">✂ Grooming</option>
+              <option value="star">✧ Care</option>
+              <option value="emergency">⚕ Emergency</option>
+            </select>
+          </label>
           <label class="service-description-field">Description<textarea name="description" rows="3" maxlength="500" required></textarea></label>
           <div class="service-form-footer"><p id="service-form-message" role="status" aria-live="polite"></p><button class="accept-appointment" type="submit">Add service</button></div>
         </form>

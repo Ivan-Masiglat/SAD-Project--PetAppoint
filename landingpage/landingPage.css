@@ -324,6 +324,10 @@ section.block {
   flex-direction: column;
 }
 
+[data-catalog-service][hidden] {
+  display: none !important;
+}
+
 .card:hover {
   transform: translateY(-4px);
 }

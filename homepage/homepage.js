@@ -36,6 +36,14 @@ if (!session) {
   const petDialog = document.getElementById('pet-dialog');
   const petForm = document.getElementById('pet-form');
   const speciesField = document.getElementById('other-species-field');
+  const petPhotoInput = petForm.elements.photo;
+  document.getElementById('pet-photo-trigger').addEventListener('click', () => petPhotoInput.click());
+  const petPhotoPreview = document.getElementById('pet-photo-preview');
+  const petPhotoSelected = document.getElementById('pet-photo-selected');
+  const petPhotoHint = document.getElementById('pet-photo-hint');
+  const removePetPhotoButton = document.getElementById('remove-pet-photo');
+  let selectedPetPhoto = '';
+  let removePetPhoto = false;
   let editingPetId = null;
   let viewedPetId = null;
   let clientAppointments = [];
@@ -57,15 +65,41 @@ if (!session) {
     const pets = PA.getPets();
     const cards = pets.map(pet => {
       const detail = [pet.species, pet.breed, pet.sex, petAge(pet.birth)].filter(Boolean).join(' · ');
+      const photo = petPhotoSource(pet.photo);
       return '<button class="pet-card" type="button" data-pet-profile="' + escapeHtml(pet.id) +
-        '" aria-label="View ' + escapeHtml(pet.name) + '\'s profile"><span class="pet-card-avatar" aria-hidden="true">' +
-        escapeHtml(pet.name.charAt(0).toUpperCase()) + '</span><span class="pet-card-info"><strong>' +
+        '" aria-label="View ' + escapeHtml(pet.name) + '\'s profile"><span class="pet-card-avatar' +
+        (photo ? ' has-photo' : '') + '" aria-hidden="true">' +
+        (photo ? '<img src="' + escapeHtml(photo) + '" alt="">' : escapeHtml(pet.name.charAt(0).toUpperCase())) +
+        '</span><span class="pet-card-info"><strong>' +
         escapeHtml(pet.name) + '</strong><small>' + escapeHtml(detail) +
         '</small></span><span class="pet-card-arrow" aria-hidden="true">View profile&nbsp; &rarr;</span></button>';
     });
     cards.push('<button class="empty-card add-pet-card" id="add-pet-card" type="button">' +
       '<span class="add-symbol" aria-hidden="true">+</span><span>Add a pet</span></button>');
     petsList.innerHTML = cards.join('');
+  }
+
+  function petPhotoSource(photo) {
+    return typeof photo === 'string' && /^data:image\/(?:png|jpeg|webp);base64,/.test(photo)
+      ? photo : '';
+  }
+
+  function readPetPhoto(file) {
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type) || file.size > 512 * 1024) {
+      return Promise.reject(new Error('Choose a PNG, JPG, or WEBP picture no larger than 512 KB.'));
+    }
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        if (typeof reader.result !== 'string') {
+          reject(new Error('The picture could not be read. Please choose another file.'));
+          return;
+        }
+        resolve(reader.result);
+      }, { once: true });
+      reader.addEventListener('error', () => reject(new Error('The picture could not be read. Please try again.')), { once: true });
+      reader.readAsDataURL(file);
+    });
   }
 
   function escapeHtml(value) {
@@ -86,6 +120,12 @@ if (!session) {
     document.getElementById('pet-profile-view').hidden = true;
     petForm.hidden = false;
     petForm.reset();
+    selectedPetPhoto = '';
+    removePetPhoto = false;
+    petPhotoHint.textContent = 'PNG, JPG, or WEBP up to 512 KB.';
+    const currentPhoto = pet ? petPhotoSource(pet.photo) : '';
+    petPhotoPreview.src = currentPhoto;
+    petPhotoSelected.hidden = !currentPhoto;
     petForm.elements.species.value = pet && ['Dog', 'Cat', 'Rabbit', 'Bird'].includes(pet.species)
       ? pet.species : pet ? 'Other' : 'Dog';
     petForm.elements.name.value = pet ? pet.name : '';
@@ -119,6 +159,10 @@ if (!session) {
       ? new Date(pet.birth + 'T00:00:00').toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
       : 'Not provided';
     document.getElementById('pet-profile-age').textContent = petAge(pet.birth) || 'Not provided';
+    const profilePhoto = document.getElementById('pet-profile-photo');
+    const photo = petPhotoSource(pet.photo);
+    profilePhoto.src = photo;
+    profilePhoto.hidden = !photo;
     petDialog.hidden = false;
     document.getElementById('edit-pet-btn').focus();
   }
@@ -156,6 +200,30 @@ if (!session) {
     closePetDialog();
   });
   petForm.elements.species.addEventListener('change', updateSpeciesField);
+  petPhotoInput.addEventListener('change', async () => {
+    const file = petPhotoInput.files[0];
+    if (!file) return;
+    petPhotoHint.textContent = 'Reading picture…';
+    try {
+      selectedPetPhoto = await readPetPhoto(file);
+      removePetPhoto = false;
+      petPhotoPreview.src = selectedPetPhoto;
+      petPhotoSelected.hidden = false;
+      petPhotoHint.textContent = 'Picture ready to save.';
+    } catch (error) {
+      petPhotoInput.value = '';
+      selectedPetPhoto = '';
+      petPhotoHint.textContent = error.message;
+    }
+  });
+  removePetPhotoButton.addEventListener('click', () => {
+    petPhotoInput.value = '';
+    selectedPetPhoto = '';
+    removePetPhoto = true;
+    petPhotoPreview.removeAttribute('src');
+    petPhotoSelected.hidden = true;
+    petPhotoHint.textContent = 'Picture will be removed when you save.';
+  });
   document.getElementById('pet-close').addEventListener('click', closePetDialog);
   document.getElementById('pet-cancel').addEventListener('click', () => {
     if (editingPetId) {
@@ -189,12 +257,24 @@ if (!session) {
     }
     const species = form.species.value === 'Other' ? form.otherSpecies.value.trim() : form.species.value;
     if (!species) return;
+    let photo = selectedPetPhoto;
+    if (petPhotoInput.files[0]) {
+      try {
+        photo = await readPetPhoto(petPhotoInput.files[0]);
+        selectedPetPhoto = photo;
+      } catch (error) {
+        petPhotoHint.textContent = error.message;
+        return;
+      }
+    }
     const pet = {
       name,
       species,
       sex: form.sex.value,
       breed: form.breed.value.trim(),
-      birth
+      birth,
+      photo: photo || (removePetPhoto ? '' :
+        (editingPetId ? petPhotoSource(PA.getPets().find(item => item.id === editingPetId)?.photo) : ''))
     };
     const submitButton = petForm.querySelector('[type="submit"]');
     submitButton.disabled = true;
@@ -330,6 +410,14 @@ if (!session) {
         const from = dateKey(fromDate);
         const to = dateKey(toDate);
         const firebase = await import('../shared/firebase.js');
+        const unavailableServices = await firebase.getUnavailableServiceIds();
+        if (unavailableServices.includes('emergency')) {
+          urgentSlotLabel.textContent = 'Emergency Care is unavailable';
+          urgentError.textContent = 'The clinic is not currently accepting Emergency Care bookings through PetAppoint. Please contact the clinic directly.';
+          urgentError.hidden = false;
+          urgentSubmit.disabled = true;
+          return;
+        }
         const bookedSlots = await firebase.getBookedAppointmentSlots(from, to);
         let emergencyPrice = firebase.DEFAULT_SERVICES.find(service => service.id === 'emergency').price;
         try {
@@ -570,17 +658,25 @@ if (!session) {
     publicServicesMessage.hidden = false;
     try {
       const firebase = await import('../shared/firebase.js');
-      const [customServices, priceOverrides] = await Promise.all([
+      const [customServices, priceOverrides, unavailableIds] = await Promise.all([
         firebase.getServices(),
-        firebase.getServicePriceOverrides()
+        firebase.getServicePriceOverrides(),
+        firebase.getUnavailableServiceIds()
       ]);
-      const services = firebase.DEFAULT_SERVICES.concat(customServices.map(service => ({
+      const unavailable = new Set(unavailableIds);
+      const services = firebase.DEFAULT_SERVICES.filter(service => !unavailable.has(service.id))
+        .concat(customServices.filter(service => !unavailable.has(service.id)).map(service => ({
         id: service.id,
         name: service.name,
         description: service.description,
         minutes: service.minutes,
         price: service.price
-      })));
+        })));
+      if (!services.length) {
+        publicServicesMessage.textContent = 'The service catalog is currently unavailable. Please contact the clinic for assistance.';
+        publicServicesMessage.hidden = false;
+        return;
+      }
       publicServiceList.innerHTML = services.map(service => {
         const price = priceOverrides[service.id] ?? service.price;
         const priceText = Number.isFinite(price)

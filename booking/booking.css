@@ -136,6 +136,8 @@ svg { flex: none; }
   font-size: 1.4rem;
   font-weight: 800;
 }
+.choice .avatar.has-photo { overflow: hidden; padding: 0; }
+.choice .avatar img { width: 100%; height: 100%; object-fit: cover; }
 .choice .avatar.alt { background: var(--orange); color: #543c17; }
 .choice .ico {
   width: 46px; height: 46px;
@@ -146,6 +148,7 @@ svg { flex: none; }
 }
 .choice.selected .ico { background: var(--white); }
 .choice .ico svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.choice .ico.custom-service-icon { font-size: 1.5rem; }
 .choice .txt { display: flex; flex-direction: column; min-width: 0; padding-right: 1.4rem; }
 .choice .txt b { font-size: 1.02rem; }
 .choice .txt small { color: var(--muted); font-size: .8rem; margin-top: .15rem; }
@@ -378,6 +381,13 @@ svg { flex: none; }
   font-weight: 400;
   background: var(--white);
 }
+.dialog .pet-photo-trigger { display: block; min-height: 38px; margin-top: .3rem; padding: 0 .85rem; border: 1px solid #c3d6db; border-radius: 9px; color: var(--teal-dark); background: var(--white); font: inherit; font-size: .8rem; font-weight: 600; cursor: pointer; }
+.dialog .pet-photo-trigger:hover { border-color: var(--teal); background: var(--sky-pale); }
+.dialog input[type="file"][hidden] { display: none !important; }
+.dialog label .pet-photo-hint { display: block; margin-top: .35rem; color: var(--muted); font-size: .72rem; font-weight: 400; }
+.dialog .pet-photo-selected { display: flex; align-items: center; gap: .75rem; margin-top: .55rem; }
+.dialog .pet-photo-selected[hidden] { display: none; }
+.dialog .pet-photo-preview { width: 76px; height: 76px; flex: 0 0 auto; margin: 0; border-radius: 12px; background: #e8eff0; object-fit: cover; }
 .dialog input:focus, .dialog select:focus { outline: 2px solid rgba(75, 154, 181, .45); border-color: var(--blue); }
 .dialog .row { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: .5rem; margin-top: .6rem; }

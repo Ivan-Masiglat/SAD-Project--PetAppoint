@@ -17,6 +17,18 @@ let bookingCalendarState = null;
 // INITIALIZATION
 // ============================================================
 window.addEventListener('DOMContentLoaded', () => {
+  import('../shared/firebase.js')
+    .then(firebase => firebase.getUnavailableServiceIds())
+    .then(unavailableIds => {
+      const unavailable = new Set(unavailableIds);
+      document.querySelectorAll('[data-catalog-service]').forEach(card => {
+        card.hidden = unavailable.has(card.dataset.catalogService);
+      });
+    })
+    .catch(error => {
+      console.error('Could not load service availability for the public catalog.', error);
+    });
+
   const session = typeof PA !== 'undefined' ? PA.getSession() : null;
   const inquiryForm = document.getElementById('inquiry-form');
   let inquirySuccessTimer;

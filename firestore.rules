@@ -31,8 +31,8 @@ service cloud.firestore {
     match /services/{serviceId} {
       allow read: if true;
       allow create: if isAdmin()
-        && request.resource.data.keys().hasOnly(['name', 'minutes', 'description', 'price', 'createdAt'])
-        && request.resource.data.keys().hasAll(['name', 'minutes', 'description', 'price', 'createdAt'])
+        && request.resource.data.keys().hasOnly(['name', 'minutes', 'description', 'price', 'icon', 'createdAt'])
+        && request.resource.data.keys().hasAll(['name', 'minutes', 'description', 'price', 'icon', 'createdAt'])
         && request.resource.data.name is string
         && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 80
@@ -45,13 +45,15 @@ service cloud.firestore {
         && request.resource.data.price is number
         && request.resource.data.price >= 0
         && request.resource.data.price <= 1000000
+        && request.resource.data.icon is string
+        && request.resource.data.icon.matches("^(paw|heart|medical|syringe|tooth|grooming|star|emergency)$")
         && request.resource.data.createdAt == request.time;
       allow update: if isAdmin()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['price'])
         && request.resource.data.price is number
         && request.resource.data.price >= 0
         && request.resource.data.price <= 1000000;
-      allow delete: if false;
+      allow delete: if isAdmin();
     }
 
     match /servicePrices/{serviceId} {
@@ -63,7 +65,17 @@ service cloud.firestore {
         && request.resource.data.price >= 0
         && request.resource.data.price <= 1000000
         && request.resource.data.updatedAt == request.time;
-      allow delete: if false;
+      allow delete: if isAdmin();
+    }
+
+    match /serviceAvailability/{serviceId} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && request.resource.data.keys().hasOnly(['available', 'updatedAt'])
+        && request.resource.data.keys().hasAll(['available', 'updatedAt'])
+        && request.resource.data.available is bool
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if isAdmin();
     }
 
     match /appointments/{appointmentId} {

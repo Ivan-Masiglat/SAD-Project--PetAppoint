@@ -112,7 +112,8 @@ export async function getServices() {
       name: data.name,
       description: data.description,
       minutes: data.minutes,
-      price: Number.isFinite(data.price) ? data.price : null
+      price: Number.isFinite(data.price) ? data.price : null,
+      icon: typeof data.icon === 'string' ? data.icon : ''
     };
   });
 }
@@ -126,6 +127,13 @@ export async function getServicePriceOverrides() {
     }
     return [document.id, price];
   }));
+}
+
+export async function getUnavailableServiceIds() {
+  const snapshot = await getDocs(collection(db, 'serviceAvailability'));
+  return snapshot.docs
+    .filter(document => document.data().available === false)
+    .map(document => document.id);
 }
 
 export async function setServicePrice(id, price, custom = false) {
@@ -429,18 +437,44 @@ export async function updateAppointment(id, changes) {
   });
 }
 
-export async function addService({ name, minutes, description, price }) {
+export async function addService({ name, minutes, description, price, icon = 'paw' }) {
+  await auth.authStateReady();
   if (auth.currentUser?.email?.toLowerCase() !== 'admin@gmail.com') {
     throw new Error('Sign in with the administrator account before adding services.');
   }
   if (!Number.isFinite(price) || price < 0 || price > 1000000) {
     throw new Error('Enter a valid service price from 0 to 1,000,000.');
   }
+  if (!['paw', 'heart', 'medical', 'syringe', 'tooth', 'grooming', 'star', 'emergency'].includes(icon)) {
+    throw new Error('Choose one of the available service icons.');
+  }
   return addDoc(collection(db, 'services'), {
     name,
     minutes,
     description,
     price,
+    icon,
     createdAt: serverTimestamp()
   });
+}
+
+export async function removeService(id, custom = false) {
+  await auth.authStateReady();
+  if ((auth.currentUser?.email || '').toLowerCase() !== 'admin@gmail.com') {
+    throw new Error('Sign in with the administrator account before removing services.');
+  }
+  if (typeof id !== 'string' || !id) {
+    throw new Error('Choose a valid service to remove.');
+  }
+  const batch = writeBatch(db);
+  if (custom) {
+    batch.delete(doc(db, 'services', id));
+  } else {
+    batch.set(doc(db, 'serviceAvailability', id), {
+      available: false,
+      updatedAt: serverTimestamp()
+    });
+  }
+  batch.delete(doc(db, 'servicePrices', id));
+  await batch.commit();
 }

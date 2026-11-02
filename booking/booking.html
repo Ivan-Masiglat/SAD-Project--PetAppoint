@@ -150,6 +150,14 @@
       <label id="pet-other-species-field" hidden>Specify species
         <input type="text" name="otherSpecies" maxlength="40" placeholder="e.g. Turtle">
       </label>
+      <label>Pet picture
+        <button type="button" class="pet-photo-trigger" id="pet-photo-trigger">Click to add photo</button>
+        <input type="file" name="photo" id="pet-photo" accept="image/png,image/jpeg,image/webp" hidden>
+        <small class="pet-photo-hint" id="pet-photo-hint" role="status">PNG, JPG, or WEBP up to 512 KB.</small>
+        <span class="pet-photo-selected" id="pet-photo-selected" hidden>
+          <img class="pet-photo-preview" id="pet-photo-preview" alt="Pet picture preview">
+        </span>
+      </label>
       <div class="row">
         <label>Breed
           <input type="text" name="breed" maxlength="40" placeholder="e.g. Shih Tzu">
@@ -216,9 +224,9 @@
         <div class="col">
           <h5>Legal</h5>
           <div class="links">
-            <a href="#">Terms and Conditions</a>
-            <a href="#">Data Privacy</a>
-            <a href="#">Cancellation Policy</a>
+            <a href="#terms" data-legal="terms">Terms and Conditions</a>
+            <a href="#privacy" data-legal="privacy">Data Privacy</a>
+            <a href="#cancellation" data-legal="cancellation">Cancellation Policy</a>
           </div>
         </div>
       </div>
@@ -236,6 +244,7 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+  <script src="../shared/legal.js"></script>
   <script src="../auth/auth.js"></script>
   <script src="booking.js"></script>
 </body>

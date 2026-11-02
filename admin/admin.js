@@ -20,14 +20,18 @@
     petsPrefix: 'petappoint.pets.'
   };
   const SERVICES = [
-    { id: 'wellness', title: 'Wellness Check-up', minutes: 30, desc: 'Full physical exam with advice on diet, weight and routine care.', icon: '♡', price: 500 },
-    { id: 'vaccination', title: 'Vaccinations', minutes: 20, desc: "Core and optional vaccines for your pet's age, species and lifestyle.", icon: '+', price: 500 },
-    { id: 'dental', title: 'Dental Care', minutes: 45, desc: 'Teeth cleaning and oral checks to prevent gum disease.', icon: '✧', price: 1500 },
-    { id: 'grooming', title: 'Grooming & Hygiene', minutes: 60, desc: 'Bath, trim, nail clipping and ear cleaning by gentle, trained staff.', icon: '⌁', price: 500 },
-    { id: 'procedures', title: 'Minor Procedures', minutes: 60, desc: 'Spay/neuter consultations and minor procedures. Pre-op screening required.', icon: '✚', price: 5000 },
-    { id: 'senior', title: 'Senior & Special Care', minutes: 40, desc: 'Gentle, accessible care plans for older pets and pets with special needs.', icon: '♡', price: 700 },
-    { id: 'emergency', title: 'Emergency Care', minutes: 30, desc: 'Urgent assessment for pets that need prompt veterinary attention.', icon: '!', price: 1000 }
+    { id: 'wellness', title: 'Wellness Check-up', minutes: 30, desc: 'Full physical exam with advice on diet, weight and routine care.', icon: 'heart', price: 500 },
+    { id: 'vaccination', title: 'Vaccinations', minutes: 20, desc: "Core and optional vaccines for your pet's age, species and lifestyle.", icon: 'syringe', price: 500 },
+    { id: 'dental', title: 'Dental Care', minutes: 45, desc: 'Teeth cleaning and oral checks to prevent gum disease.', icon: 'tooth', price: 1500 },
+    { id: 'grooming', title: 'Grooming & Hygiene', minutes: 60, desc: 'Bath, trim, nail clipping and ear cleaning by gentle, trained staff.', icon: 'grooming', price: 500 },
+    { id: 'procedures', title: 'Minor Procedures', minutes: 60, desc: 'Spay/neuter consultations and minor procedures. Pre-op screening required.', icon: 'medical', price: 5000 },
+    { id: 'senior', title: 'Senior & Special Care', minutes: 40, desc: 'Gentle, accessible care plans for older pets and pets with special needs.', icon: 'paw', price: 700 },
+    { id: 'emergency', title: 'Emergency Care', minutes: 30, desc: 'Urgent assessment for pets that need prompt veterinary attention.', icon: 'emergency', price: 1000 }
   ];
+  const SERVICE_ICONS = {
+    paw: '🐾', heart: '♡', medical: '✚', syringe: '💉',
+    tooth: '🦷', grooming: '✂', star: '✧', emergency: '⚕'
+  };
   const now = new Date();
   const dateLabel = document.getElementById('today-label');
   if (dateLabel) {
@@ -81,6 +85,37 @@
       }
     });
   });
+  const accountButton = document.querySelector('.admin-account-button');
+  const accountMenu = document.getElementById('admin-account-menu');
+  if (accountButton && accountMenu) {
+    accountButton.addEventListener('click', event => {
+      event.stopPropagation();
+      accountMenu.hidden = !accountMenu.hidden;
+      accountButton.setAttribute('aria-expanded', String(!accountMenu.hidden));
+    });
+    document.addEventListener('click', event => {
+      if (!accountMenu.contains(event.target) && !accountButton.contains(event.target)) {
+        accountMenu.hidden = true;
+        accountButton.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape' && !accountMenu.hidden) {
+        accountMenu.hidden = true;
+        accountButton.setAttribute('aria-expanded', 'false');
+        accountButton.focus();
+      }
+    });
+    accountMenu.querySelector('.admin-account-logout').addEventListener('click', async () => {
+      try {
+        await PA.logout();
+        transitionTo('../landingpage/landingPage.html');
+      } catch (error) {
+        console.error('Could not sign out of Firebase.', error);
+        window.alert('Could not securely sign out. Please check your connection and try again.');
+      }
+    });
+  }
 
   function readStorage(key, fallback) {
     try {
@@ -199,6 +234,17 @@
   }
 
   function renderDashboard() {
+    const searchInput = document.getElementById('dashboard-search');
+    const search = searchInput ? searchInput.value.trim().toLowerCase() : '';
+    const matchesSearch = appointment => !search || [
+      appointment.petName,
+      ownerName(appointment),
+      appointment.email,
+      appointment.service,
+      appointment.ref,
+      appointment.date,
+      appointment.time
+    ].join(' ').toLowerCase().includes(search);
     const todayKey = dateKey(now);
     const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     weekStart.setDate(weekStart.getDate() - ((weekStart.getDay() + 6) % 7));
@@ -224,8 +270,12 @@
     const pendingList = document.getElementById('dashboard-pending-list');
     const pendingEmpty = document.getElementById('dashboard-pending-empty');
     if (pendingList && pendingEmpty) {
-      const requests = pendingAppointments().slice(0, 4);
+      const requests = pendingAppointments().filter(matchesSearch).slice(0, 4);
       pendingEmpty.hidden = requests.length > 0;
+      pendingEmpty.querySelector('strong').textContent = search ? 'No matching requests' : 'No requests yet';
+      pendingEmpty.querySelector('p').textContent = search
+        ? 'Try another owner, pet, or reference.'
+        : 'When someone books a visit, you can review it here.';
       pendingList.innerHTML = requests.map(appointment => {
         const date = appointmentDate(appointment);
         return '<article class="approval-request"><div class="approval-request-details"><strong>' +
@@ -244,11 +294,17 @@
     if (upcomingList && upcomingEmpty) {
       const upcoming = systemAppointments()
         .filter(appointment => statusOf(appointment) === 'confirmed')
+        .filter(matchesSearch)
         .map(appointment => ({ appointment, start: appointmentDateTime(appointment) }))
         .filter(item => item.start && item.start >= now)
         .sort((left, right) => left.start - right.start)
         .slice(0, 4);
       upcomingEmpty.hidden = upcoming.length > 0;
+      upcomingEmpty.querySelector('strong').textContent = search
+        ? 'No matching appointments' : 'No upcoming appointments';
+      upcomingEmpty.querySelector('p').textContent = search
+        ? 'Try another owner, pet, or reference.'
+        : 'Confirmed visits will show up here.';
       upcomingList.innerHTML = upcoming.map(({ appointment, start }) =>
         '<article class="day-appointment"><time>' + escapeHtml(displayDate(start)) + '<br>' +
         escapeHtml(appointment.time || 'Time TBD') + '</time><div class="day-appointment-details"><strong>' +
@@ -258,6 +314,9 @@
       ).join('');
     }
   }
+
+  const dashboardSearch = document.getElementById('dashboard-search');
+  if (dashboardSearch) dashboardSearch.addEventListener('input', renderDashboard);
 
   function updatePendingNavCount() {
     const countValue = pendingAppointments().length;
@@ -747,13 +806,14 @@
     const loadMessage = document.getElementById('service-load-message');
     let remoteServices = [];
     let priceOverrides = {};
+    let unavailableServiceIds = new Set();
     function updateServices() {
       const search = searchInput ? searchInput.value.trim().toLowerCase() : '';
       const allServices = SERVICES.map(service => ({
         ...service,
         price: priceOverrides[service.id] ?? service.price,
         custom: false
-      })).concat(remoteServices);
+      })).concat(remoteServices).filter(service => !unavailableServiceIds.has(service.id));
       const matching = allServices.filter(service =>
         (service.title + ' ' + service.desc).toLowerCase().includes(search));
       if (!matching.length) {
@@ -762,15 +822,21 @@
           '</strong><p>' + (allServices.length ? 'Try a different search.' : 'Add a service to make it available for booking.') + '</p></div>';
         return;
       }
-      list.innerHTML = matching.map(service => '<article class="panel service-card"><span class="service-icon" aria-hidden="true">' +
-        escapeHtml(service.icon) + '</span><div class="service-card-title"><h2>' + escapeHtml(service.title) +
+      list.innerHTML = matching.map(service => {
+        const icon = SERVICE_ICONS[service.icon] || SERVICE_ICONS.paw;
+        return '<article class="panel service-card"><span class="service-icon" aria-hidden="true">' + icon +
+        '</span><div class="service-card-title"><h2>' + escapeHtml(service.title) +
         '</h2><span class="duration-pill">About ' + service.minutes + ' min</span></div><p>' +
         escapeHtml(service.desc) + '</p><label class="service-price-editor">Approx. price (PHP)<span><span>₱</span><input type="number" min="0" max="1000000" step="1" value="' +
         escapeHtml(service.price ?? '') + '" data-service-price="' + escapeHtml(service.id) + '" aria-label="Price for ' +
         escapeHtml(service.title) + '"></span></label><div class="service-card-footer"><span class="service-availability"><i></i> Available for booking</span>' +
         '<button class="save-service-price" type="button" data-save-service-price="' + escapeHtml(service.id) +
         '" data-custom="' + String(Boolean(service.custom)) + '">Save price</button><small class="price-save-message" data-price-message="' +
-        escapeHtml(service.id) + '" role="status"></small></div></article>').join('');
+        escapeHtml(service.id) + '" role="status"></small>' +
+        '<button class="remove-service" type="button" data-remove-service="' + escapeHtml(service.id) +
+          '" data-custom="' + String(Boolean(service.custom)) + '">Remove service</button>' +
+        '</div></article>';
+      }).join('');
     }
     if (searchInput) searchInput.addEventListener('input', updateServices);
     if (form) {
@@ -782,7 +848,8 @@
           name: String(values.get('name') || '').trim(),
           minutes: Number(values.get('minutes')),
           description: String(values.get('description') || '').trim(),
-          price: Number(values.get('price'))
+          price: Number(values.get('price')),
+          icon: String(values.get('icon') || 'paw')
         };
         if (!service.name || !service.description ||
             !Number.isInteger(service.minutes) || service.minutes < 1 || service.minutes > 1440 ||
@@ -802,7 +869,7 @@
             desc: service.description,
             price: service.price,
             custom: true,
-            icon: '♡'
+            icon: service.icon
           });
           form.reset();
           updateServices();
@@ -817,6 +884,30 @@
       });
     }
     list.addEventListener('click', async event => {
+      const removeButton = event.target.closest('[data-remove-service]');
+      if (removeButton) {
+        const serviceId = removeButton.dataset.removeService;
+        const service = SERVICES.find(item => item.id === serviceId) ||
+          remoteServices.find(item => item.id === serviceId);
+        if (!service || !window.confirm('Remove "' + service.title + '" from the service catalog? Existing appointments will be kept.')) return;
+        removeButton.disabled = true;
+        try {
+          const firebase = await import('../shared/firebase.js');
+          await firebase.removeService(serviceId, removeButton.dataset.custom === 'true');
+          unavailableServiceIds.add(serviceId);
+          if (removeButton.dataset.custom === 'true') {
+            remoteServices = remoteServices.filter(item => item.id !== serviceId);
+          }
+          updateServices();
+          if (formMessage) formMessage.textContent = 'Service removed. Existing appointments were kept.';
+        } catch (error) {
+          console.error('Could not remove service from Firestore.', error);
+          const message = list.querySelector('[data-price-message="' + CSS.escape(serviceId) + '"]');
+          if (message) message.textContent = 'Could not remove. Check the published Firestore rules.';
+          removeButton.disabled = false;
+        }
+        return;
+      }
       const button = event.target.closest('[data-save-service-price]');
       if (!button) return;
       const serviceId = button.dataset.saveServicePrice;
@@ -849,11 +940,13 @@
     });
     updateServices();
     return import('../shared/firebase.js').then(async firebase => {
-      const [services, overrides] = await Promise.all([
+      const [services, overrides, unavailableIds] = await Promise.all([
         firebase.getServices(),
-        firebase.getServicePriceOverrides()
+        firebase.getServicePriceOverrides(),
+        firebase.getUnavailableServiceIds()
       ]);
       priceOverrides = overrides;
+      unavailableServiceIds = new Set(unavailableIds);
       remoteServices = services.map(service => ({
         id: service.id,
         title: service.name,
@@ -861,7 +954,7 @@
         desc: service.description,
         price: service.price,
         custom: true,
-        icon: '♡'
+        icon: SERVICE_ICONS[service.icon] ? service.icon : 'paw'
       }));
       updateServices();
     }).catch(error => {

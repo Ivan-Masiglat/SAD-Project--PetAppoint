@@ -448,6 +448,17 @@ button {
   font-weight: 700;
 }
 
+.pet-card-avatar.has-photo {
+  overflow: hidden;
+  background: #e8eff0;
+}
+
+.pet-card-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .pet-card-info {
   display: flex;
   min-width: 0;
@@ -585,6 +596,89 @@ button {
 
 .pet-dialog label[hidden] {
   display: none;
+}
+
+.pet-photo-hint {
+  display: block;
+  margin-top: .35rem;
+  color: var(--muted);
+  font-size: .72rem;
+  font-weight: 400;
+}
+
+.pet-dialog .pet-photo-trigger {
+  display: block;
+  width: fit-content;
+  min-height: 38px;
+  margin-top: .4rem;
+  padding: 0 .85rem;
+  border: 1px solid #c3d6db;
+  border-radius: 9px;
+  color: var(--teal);
+  background: #fcfefe;
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pet-dialog .pet-photo-trigger:hover {
+  border-color: var(--teal);
+  background: #e8f1f0;
+}
+
+.pet-dialog input[type="file"][hidden] {
+  display: none !important;
+}
+
+.pet-dialog .pet-photo-preview {
+  width: 76px;
+  height: 76px;
+  flex: 0 0 auto;
+  margin: 0;
+  border-radius: 12px;
+  background: #e8eff0;
+  object-fit: cover;
+}
+
+.pet-photo-selected {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-top: .55rem;
+}
+
+.pet-photo-selected[hidden],
+.pet-profile-photo[hidden] {
+  display: none;
+}
+
+.pet-dialog .remove-pet-photo {
+  width: fit-content;
+  min-height: 34px;
+  margin: 0;
+  padding: 0 .7rem;
+  border: 0;
+  border-radius: 8px;
+  color: #a33b32;
+  background: #fff3f1;
+  font: inherit;
+  font-size: .75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.pet-dialog .remove-pet-photo:hover {
+  background: #ffe8e4;
+}
+
+.pet-profile-photo {
+  display: block;
+  width: 112px;
+  height: 112px;
+  margin: 0 0 1rem;
+  border-radius: 16px;
+  object-fit: cover;
 }
 
 .pet-dialog input,
